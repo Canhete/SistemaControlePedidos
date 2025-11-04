@@ -3,25 +3,68 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cliente.h>
-#include <interface.h>
+#include <produto.h>
 #include <pedido.h>
 #include <persistencia.h>
-#include <produto.h>
 
-/* DEFINIÇÕES & CONSTANTES */
-#define NOME_ARQUIVO_PEDIDO "pedido.csv"
+/*==================================== MÓDULO PEDIDO ==============================================================*/
+/* PEDIDO */
 
+void guardarPedido(struct Pedido *P){
+    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "a");
+    if(!arq){
+        perror("ERRO AO ABRIR O ARQUIVO!");
+        return;
+    }
 
-void guardarPedido(FILE *F, struct ItemPedido *P){
-    *F = fopen(NOME_ARQUIVO_PEDIDO, "r+");
+    fprintf(arq, "%d,%d,%s,%lf\n", P->id, P->clienteId, P->data, P->total);
 
-    fscanf()
+    fclose(arq);
 }
 
-void adicionarPedido(FILE *F, struct ItemPedido *P){
+// Como a algoritmo que escreve informações no arquivo é sequencial, deve-se copiar toda informação do arquivo, sobreescrever com essa mesma informação, ignorando no processo o arquivo que não deseja ser gravado, no caso arquivo a ser apagado. No final faz uma cópia do original para o temporário, retirando da cópia o que se deseja remover, apaga-se o arquivo original e renomeia o temporário como original. O resultado é uma cópia identica com a ilusão de que uma informação foi removida.
 
+void apagarPedido(int idParaRemover){
+    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "r");
+    if(!arq){
+        perror("ERRO AO ABRIR O ARQUIVO!");
+        return;
+    }
+
+    FILE *arqtemp = fopen(NOME_ARQUIVO_TEMP, "w");
+    if(!arq){
+        perror("ERRO AO CRIAR ARQUIVO TEMPORÁRIO!");
+        fclose(arq);
+        return;
+    }
+
+    char linha[TAMANHO_BUFFER_LINHA];
+
+    while(fgets(linha, sizeof(linha), arq)){
+        int id;
+        sscanf(linha, "%d,", &id);
+        if(id != idParaRemover){
+            fputs(linha, arqtemp);
+        }
+    }
+
+    fclose(arq);
+    fclose(arqtemp);
+
+    remove(arq);
+    rename(NOME_ARQUIVO_TEMP, arq);
 }
 
-void apagarPedido(FILE *F, struct ItemPedido *P){
+/* ITEM DE PEDIDO */
 
+void guardarItemPedido(){
+    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "a");
+    if(!arq){
+        perror("ERRO AO ABRIR O ARQUIVO!");
+        return;
+    }
+
+    fprintf(arq, "%d,%d,%s,%lf\n", P->id, P->clienteId, P->data, P->total);
+
+    fclose(arq);
 }

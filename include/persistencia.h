@@ -3,10 +3,18 @@
 #ifndef persistencia
 #define persistencia
 
-void guardarPedido(FILE *F, struct ItemPedido *P);
+/* DEFINIÇÕES & CONSTANTES */
 
-void adicionarPedido(FILE *F, struct ItemPedido *P);
+#define NOME_ARQUIVO_CLIENTE "cliente.csv"
+#define NOME_ARQUIVO_PRODUTO "produto.csv"
+#define NOME_ARQUIVO_PEDIDO "pedido.csv"
+#define NOME_ARQUIVO_TEMP "temp.csv"
+#define TAMANHO_BUFFER_LINHA 216    // Tamanho máximo de caracteres de uma linha, usado para ler linhas
 
-void apagarPedido(FILE *F, struct ItemPedido *P);
+/* FUNÇÕES */
+
+void guardarPedido(struct Pedido *P);
+
+void apagarPedido(int idParaRemover);
 
 #endif
