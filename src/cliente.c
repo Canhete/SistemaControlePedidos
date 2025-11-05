@@ -1,4 +1,4 @@
-// estrutura para pessoa física
+// estrutura para Pessoa Física
 struct PessoaFisica{
     int id;                    // codigo identificador único
     char cpf[15];              // cpf (formato: 000.000.000-00)
