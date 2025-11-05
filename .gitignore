@@ -1,0 +1,50 @@
+# TODAS ESSAS EXTENSÕES E ARQUIVOS SERÃO IGNORADOS DO COMMIT NO GIT
+
+# Compilação comum
+*.o
+*.obj
+*.so
+*.a
+*.out
+*.exe
+*.dll
+*.lib
+*.lo
+*.la
+
+# Arquivos de depuração
+*.dSYM/
+*.stackdump
+*.pdb
+
+# Diretórios de build
+build/
+bin/
+obj/
+out/
+dist/
+Debug/
+Release/
+
+# Arquivos temporários de editores
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Arquivos de log
+*.log
+
+# Arquivos gerados por IDEs
+.vscode/
+.idea/
+*.code-workspace
+*.user
+*.workspace
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
