@@ -23,7 +23,7 @@ Cadastrar Pedido - Descrição do fluxo principal/alternativo
     pedido.
     6. (Cadastrar Itens de Pedido) (Analisa Produto) O sistema verifica se o produto referenciado pelo código
     existe na lista de produtos. Caso não exista, o sistema retorna uma mensagem de erro informando
-    */
+*/
 
 /* Variáveis globais inicializadas */
 
@@ -123,6 +123,7 @@ int analisarItemPedido(int idDoItemPedido){
 }
 
 void cadastrarItemPedido(struct ItemPedido *IP){
+    // IMPLEMENTAR FUNÇÕES DE VALIDAÇÃO DE CADA CAMPO
     do{
         printf("Id do Pedido: ");
         scanf("%d", IP->pedidoId);
@@ -148,8 +149,17 @@ void cadastrarItemPedido(struct ItemPedido *IP){
 void removerPedido(){
     int idRemover;
 
-    printf("Digite o id do produto a ser removido: ");
+    printf("Digite o id do pedido a ser removido: ");
     scanf("%d", &idRemover);
 
     apagarPedido(idRemover);
+}
+
+void removerItemPedido(){
+    int idRemover;
+
+    printf("Digite o id do item de pedido a ser removido: ");
+    scanf("%d", &idRemover);
+
+    apagarItemPedido(idRemover);
 }

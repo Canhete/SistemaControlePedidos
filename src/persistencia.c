@@ -57,14 +57,45 @@ void apagarPedido(int idParaRemover){
 
 /* ITEM DE PEDIDO */
 
-void guardarItemPedido(){
-    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "a");
+void guardarItemPedido(struct ItemPedido *IP){
+    FILE *arq = fopen(NOME_ARQUIVO_ITEM_PEDIDO, "a");
     if(!arq){
         perror("ERRO AO ABRIR O ARQUIVO!");
         return;
     }
 
-    fprintf(arq, "%d,%d,%s,%lf\n", P->id, P->clienteId, P->data, P->total);
+    fprintf(arq, "%d,%d,%d,%lf\n", IP->pedidoId, IP->produtoId, IP->quantidade, IP->subtotal);
 
     fclose(arq);
+}
+
+void apagarItemPedido(int idParaRemover){
+    FILE *arq = fopen(NOME_ARQUIVO_ITEM_PEDIDO, "r");
+    if(!arq){
+        perror("ERRO AO ABRIR O ARQUIVO!");
+        return;
+    }
+
+    FILE *arqtemp = fopen(NOME_ARQUIVO_TEMP, "w");
+    if(!arq){
+        perror("ERRO AO CRIAR ARQUIVO TEMPORÁRIO!");
+        fclose(arq);
+        return;
+    }
+
+    char linha[TAMANHO_BUFFER_LINHA];
+
+    while(fgets(linha, sizeof(linha), arq)){
+        int id;
+        sscanf(linha, "%d,", &id);
+        if(id != idParaRemover){
+            fputs(linha, arqtemp);
+        }
+    }
+
+    fclose(arq);
+    fclose(arqtemp);
+
+    remove(arq);
+    rename(NOME_ARQUIVO_TEMP, arq);
 }
