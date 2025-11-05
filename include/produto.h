@@ -1,7 +1,7 @@
 /* Biblioteca dos arquivos */
 
-#ifndef produto
-#define produto
+#ifndef PRODUTO_H
+#define PRODUTO_H
 
 /* DEFINIÇÕES & CONSTANTES */
 
