@@ -1,7 +1,7 @@
 /* Biblioteca da interface */
 
-#ifndef interface
-#define interface
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
 /* DEFINIÇÕES & CONSTANTES */
 

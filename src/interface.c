@@ -12,4 +12,6 @@ void telaClientes();
 
 void telaProdutos();
 
-void telaPedidos();
+void telaPedidos(){
+    
+}

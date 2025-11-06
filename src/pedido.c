@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <pedido.h>
-#include "pedido.h"
 #include <persistencia.h>
 #include <utils.h>
 
@@ -33,17 +32,23 @@ struct ItemPedido itemPedidoGlobal = {};
 void cadastrarPedido(struct Pedido *P){
     const char dataAtual = obterDataAtual();
     
-    printf("Id do pedido: ");
-    scanf("%d", P->id);
-    getchar();
+    do{
+        printf("Id do pedido: ");
+        scanf("%d", P->id);
+        getchar();
+    } while(!validarIdPedido(P->id));
 
-    printf("Id do cliente: ");
-    scanf("%d", P->clienteId);
-    getchar();
+    do{
+        printf("Id do cliente: ");
+        scanf("%d", P->clienteId);
+        getchar();
+    } while(!validarIdCliente(P->clienteId));
 
-    printf("Data (use o formato %s): ", dataAtual);
-    fgets(P->data, sizeof(P->data), stdin);
-    P->data[strcspn(P->data, "\n")] = '\0';
+    do{
+        printf("Data (use o formato %s): ", dataAtual);
+        fgets(P->data, sizeof(P->data), stdin);
+        P->data[strcspn(P->data, "\n")] = '\0';
+    } while(!validarData(P->data));
 
     printf("Total: ");
     scanf("%lf", P->total);
@@ -65,7 +70,7 @@ void listarPedidos(){
     printf("| ID         | ID do Cliente  | Data        | Total    |\n");
     printf("+------------+----------------+-------------+----------+\n");
 
-    while(fgets(linha, sizeof(linha), arq)){
+    while(fgets(linha, sizeof(linha), arq) != NULL){
         struct Pedido P;
 
         if(sscanf(linha, "%d,%49[^,],%f", &P.id, &P.clienteId, P.data, &P.total) == 4){
@@ -109,7 +114,7 @@ int analisarItemPedido(int idDoItemPedido){
 
     char linha[TAMANHO_BUFFER_LINHA];
 
-    while(fgets(linha, sizeof(linha), arq)){
+    while(fgets(linha, sizeof(linha), arq) != NULL){
         struct Pedido P;
 
         if(sscanf(linha, "%d,%49[^,],%f", &P.id, &P.clienteId, P.data, &P.total) == 4 && (P.id == idDoItemPedido)){
@@ -155,7 +160,7 @@ void removerPedido(){
     apagarPedido(idRemover);
 }
 
-void removerItemPedido(){
+void removerItemPedido(struct ItemPedido *IP){
     int idRemover;
 
     printf("Digite o id do item de pedido a ser removido: ");
