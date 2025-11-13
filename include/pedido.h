@@ -34,6 +34,8 @@ int analisarPedido(int idDoPedido);
 
 int analisarItemPedido(int idDoItemPedido);
 
+void detalharPedido();
+
 /* ITEM DE PEDIDOS */
 
 void cadastrarItemPedido(struct ItemPedido *IP);
