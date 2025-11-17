@@ -11,7 +11,7 @@
 /* PEDIDO */
 
 void guardarPedido(struct Pedido *P){
-    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "a");
+    FILE *arq = fopen(NOME_ARQUIVO_PEDIDO, "a+");
     if(!arq){
         perror("ERRO AO ABRIR O ARQUIVO!");
         return;

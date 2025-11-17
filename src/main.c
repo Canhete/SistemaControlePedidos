@@ -6,6 +6,9 @@
 #include <produto.h>
 
 int main(){
+    struct Pedido P;
+
+    cadastrarPedido(&P);
 
     return 0;
 }

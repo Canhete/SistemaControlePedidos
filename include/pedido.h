@@ -1,7 +1,7 @@
 /* Biblioteca de pedido */
 
-#ifndef pedido
-#define pedido
+#ifndef PEDIDO_H
+#define PEDIDO_H
 
 /* Estrutura de dados do Pedido */
 
