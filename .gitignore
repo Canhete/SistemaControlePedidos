@@ -11,6 +11,7 @@
 *.lib
 *.lo
 *.la
+*.x
 
 # Arquivos de depuração
 *.dSYM/
@@ -22,6 +23,7 @@ build/
 bin/
 obj/
 out/
+output/
 dist/
 Debug/
 Release/

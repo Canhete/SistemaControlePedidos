@@ -1,11 +1,6 @@
 /* BIBLIOTECAS */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <cliente.h>
-#include <produto.h>
-#include <pedido.h>
-#include <persistencia.h>
+#include "../include/persistencia.h"
 
 /*==================================== MÓDULO PEDIDO ==============================================================*/
 /* PEDIDO */
@@ -43,16 +38,15 @@ void apagarPedido(int idParaRemover){
     while(fgets(linha, sizeof(linha), arq)){
         int id;
         sscanf(linha, "%d,", &id);
-        if(id != idParaRemover){
-            fputs(linha, arqtemp);
-        }
+        if(id != idParaRemover) fputs(linha, arqtemp);
     }
 
     fclose(arq);
     fclose(arqtemp);
 
-    remove(arq);
-    rename(NOME_ARQUIVO_TEMP, arq);
+    // Remove o arquivo antigo de cliente e renomeia o temporário para o nome do arquivo de cliente
+    remove(NOME_ARQUIVO_PEDIDO);
+    rename(NOME_ARQUIVO_TEMP, NOME_ARQUIVO_PEDIDO);
 }
 
 /* ITEM DE PEDIDO */
@@ -96,6 +90,6 @@ void apagarItemPedido(int idParaRemover){
     fclose(arq);
     fclose(arqtemp);
 
-    remove(arq);
-    rename(NOME_ARQUIVO_TEMP, arq);
+    remove(NOME_ARQUIVO_ITEM_PEDIDO);
+    rename(NOME_ARQUIVO_TEMP, NOME_ARQUIVO_ITEM_PEDIDO);
 }

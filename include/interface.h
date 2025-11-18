@@ -3,11 +3,23 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
+#include <ncurses.h>
+#include <dirent.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <ctype.h>
+#include "persistencia.h"
+#include "estados.h"
+
 /* DEFINIÇÕES & CONSTANTES */
 
-#define SCREEN_WIDTH   80   // Largura da tela
-#define SCREEN_HEIGHT  25   // Altura da tela
+#define SCREEN_MIN_WIDTH   30   // Largura da tela
+#define SCREEN_MIN_HEIGHT  10   // Altura da tela
 
+#define UI_INDENT      4    // Identação
+#define UI_RECUO       3    // Récuo
 #define UI_MARGIN      2    // Margem
 #define UI_PADDING     1    // Padding
 
@@ -24,14 +36,25 @@
 #define COLOR_PAIR_MENU      5  // Cor do menu
 #define COLOR_PAIR_HIGHLIGHT 6  // Cor de highlight
 
+#define BUFFER_LINHA_CARACTERES 512   // Tamanho máximo do buffer para quando o usuário for digitar algo na tela
+#define BUFFER_LINHA_LOGO 100         // Tamanho do buffer da logo
+#define QUANT_LINHAS_LOGO 10          // Quantidade de linhas da logo
+
 /* FUNÇÕES DAS INTERFACE (cada uma é uma tela e/ou elemento gráfico) */
+
+void inicializaInterface();
+void finalizaInterface();
+
+/* TODOS STATES DE INTERFACE */
 
 void menuPrincipal();
 
-void telaClientes();
+/*
+Estado telaClientes();
 
-void telaProdutos();
+Estado telaProdutos();
 
-void telaPedidos();
+Estado telaPedidos();
+*/
 
 #endif

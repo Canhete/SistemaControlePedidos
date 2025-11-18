@@ -1,7 +1,16 @@
-/* Biblioteca de pedido */
-
 #ifndef PEDIDO_H
 #define PEDIDO_H
+
+/* Bibliotecas */
+
+#include "persistencia.h"
+#include "utils.h"
+#include "estados.h"
+#include "interface.h"
+
+/* Constantes e definições */
+
+
 
 /* Estrutura de dados do Pedido */
 
@@ -19,9 +28,6 @@ struct ItemPedido {
     double subtotal;
 };
 
-extern struct Pedido pedidoGlobal;
-extern struct ItemPedido itemPedidoGlobal;
-
 /* PEDIDO */
 
 void cadastrarPedido(struct Pedido *P);
@@ -33,6 +39,8 @@ void removerPedido();
 int analisarPedido(int idDoPedido);
 
 int analisarItemPedido(int idDoItemPedido);
+
+void detalharPedido();
 
 /* ITEM DE PEDIDOS */
 
