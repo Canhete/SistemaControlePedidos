@@ -5,6 +5,14 @@ utilidade para o programa */
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "persistencia.h"
+#include "cliente.h"
+#include "produto.h"
+#include "pedido.h"
+
 /* DEFINIÇÕES E CONSTANTES */
 
 

@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <pedido.h>
-#include <persistencia.h>
-#include <utils.h>
+#include "../include/pedido.h"
 
 /* Constates e definições */
 
@@ -26,11 +22,8 @@ Cadastrar Pedido - Descrição do fluxo principal/alternativo
 
 /* Variáveis globais inicializadas */
 
-struct Pedido pedidoGlobal = {};
-struct ItemPedido itemPedidoGlobal = {};
-
 void cadastrarPedido(struct Pedido *P){
-    const char dataAtual = obterDataAtual();
+    const char *dataAtual = obterDataAtual();
     
     do{
         printf("Id do pedido: ");
@@ -167,4 +160,121 @@ void removerItemPedido(struct ItemPedido *IP){
     scanf("%d", &idRemover);
 
     apagarItemPedido(idRemover);
+}
+
+void desenhaMenu(WINDOW *menu_win, int destacado, char *opcoes[], int n_opcoes){
+    werase(menu_win);
+    box(menu_win, 0, 0);
+
+    for(int i=0; i<n_opcoes; i++){
+        if (i == destacado) wattron(menu_win, A_REVERSE);
+
+        mvprintw(menu_win, i+1, 2, "%s", opcoes[i]); // Desenha cada uma das opções
+
+        if(i == destacado) wattroff(menu_win, A_REVERSE);
+    }
+
+    wrefresh(menu_win); // Atualiza a janela
+}
+
+void telaPedidos(){
+    initscr();
+    cbreak();
+    noecho();
+    curs_set(0);
+
+    // Obtenção do tamanho da tela e das cooredenadas de inicio
+    int altura, largura; 
+    getmaxyx(stdscr, altura, largura);
+    int inicio_y = (LINES - altura) / 2;
+    int inicio_x = (COLS - largura) / 2;
+
+    // Janelas
+    WINDOW *JanelaMenu = newwin(altura, largura, inicio_y, inicio_x);
+    WINDOW *TituloPedidos = newwin(10, 40, 0, 0);
+    WINDOW *JanelaOpcoes = newwin(50, 30, 0, 0);
+    WINDOW *JanelaEscolhas = newwin(altura - 5, largura - 10, inicio_y + 5, inicio_x + 5);
+
+    void desenhaMenu(WINDOW *menu_win, int destacado, char *opcoes[], int n_opcoes); 
+
+    int escolha = 0;
+    int destacado = 0;
+    int ch;
+    const int NUM_OPCOES_PEDIDO = 5;
+    const int NUM_OPCOES_ITEM_PEDIDO = 4;
+
+    char *opcoesPedido[] = {
+        "Cadastrar Pedido",
+        "Listar Pedidos",
+        "Detalhar Pedido",
+        "Apagar Pedido",
+        "Sair"
+    };
+
+    char *opcoesItemPedido[] = {
+        "Cadastrar Item de Pedido",
+        "Listar Item de Pedidos",
+        "Apagar Item de Pedido",
+        "Sair"
+    };
+    
+    // Escreve em cada janela 
+    box(TituloPedidos, 0, 0);
+    mvwprintw(TituloPedidos, (altura - 5)/2, (largura - 2)/2, "Pedidos");
+    
+    while(1){
+        desenhaMenu(JanelaEscolhas, destacado, opcoesPedido, NUM_OPCOES_PEDIDO);
+        ch = wgetch(JanelaEscolhas);
+
+        switch(ch){
+            case KEY_UP:
+                if (destacado > 0) destacado--;
+                break;
+
+            case KEY_DOWN:
+                if (destacado < NUM_OPCOES_PEDIDO - 1) destacado++;
+                break;
+
+            case 10: // ENTER não funciona por algum motivo lol
+                escolha = destacado;
+                break;
+
+            case 'q':
+            case 'Q':
+                escolha = NUM_OPCOES_PEDIDO - 1;
+                break;
+        }
+        if (ch == 10 || ch == 'q' || ch == 'Q' && escolha == NUM_OPCOES_PEDIDO - 1) break;  // Sair 
+        else { 
+            clear(); 
+            attron(COLOR_PAIR(1) | A_BOLD); 
+            mvprintw(LINES/2, (COLS - 30)/2, "Você escolheu: %s", opcoesPedido[escolha]); 
+            attroff(COLOR_PAIR(1) | A_BOLD); 
+            mvprintw(LINES/2 + 2, (COLS - 30)/2, "Pressione qualquer tecla..."); 
+            refresh(); 
+        }
+
+        // Exemplo de animação simples 
+        for (int i = 0; i < 5; i++) { 
+            wclear(JanelaOpcoes); 
+            box(JanelaOpcoes, 0, 0); 
+            mvwprintw(JanelaOpcoes, 0, 2, "[ Janela de Status ]"); 
+            mvwprintw(JanelaOpcoes, 3, 2, "Atualizando: %d/5", i + 1); 
+            wrefresh(JanelaOpcoes); 
+            napms(500);  // Pausa de 500ms 
+        }
+        
+        mvwprintw(JanelaOpcoes, 5, 2, "Concluído! Pressione qualquer tecla..."); 
+        wrefresh(JanelaOpcoes); 
+
+        // Libera memória das janelas 
+        delwin(JanelaMenu); 
+        delwin(JanelaEscolhas); 
+        delwin(JanelaOpcoes); 
+        endwin();
+    }
+}
+
+int main(){
+    telaPedidos();
 }

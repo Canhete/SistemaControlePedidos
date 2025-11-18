@@ -1,14 +1,13 @@
-#include <stdio.h>
-#include <cliente.h>
-#include <interface.h>
-#include <pedido.h>
-#include <persistencia.h>
-#include <produto.h>
+#include "../include/interface.h"
+#include "../include/estados.h"
+
 
 int main(){
-    struct Pedido P;
+    inicializaInterface();
 
-    cadastrarPedido(&P);
+    executaEstado();
+
+    finalizaInterface();
 
     return 0;
 }
