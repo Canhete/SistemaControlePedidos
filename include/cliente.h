@@ -1,7 +1,12 @@
-/* Biblioteca do Cliente */
-
 #ifndef CLIENTE_H
 #define CLIENTE_H
+
+/* Bibliotecas */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 /* Estrutura de dados do Cliente */
 
@@ -22,5 +27,7 @@ int validarCNPJ(char cnpj[]);
 void cadastrarCliente(struct Cliente clientes[], int *qtd);
 
 void listarClientes(struct Cliente clientes[], int qtd);
+
+void menuClientes();
 
 #endif

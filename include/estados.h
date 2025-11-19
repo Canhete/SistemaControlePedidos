@@ -4,9 +4,8 @@
 /* Bibliotecas */
 
 #include <stdio.h>
-#include "cliente.h"
-#include "produto.h"
-#include "pedido.h"
+#include <stdlib.h>
+
 #include "interface.h"
 
 /* Todos States do programa, cada estado indica um menu diferente, trabalhar com states é bem superior do que ter que aninhar vários if elses e switches, o que é muito cringe */
@@ -14,17 +13,35 @@
 /* Estrutura dos States */
 typedef enum {
     ST_ABRINDO,
-    ST_TELA_PRINCIPAL,
-    ST_TELA_PRINCIPAL_PEDIDO,
-    ST_TELA_CADASTRO_PEDIDO,
-    ST_TELA_LISTA_PEDIDO,
-    ST_TELA_DETALHA_PEDIDO,
-    ST_TELA_APAGA_PEDIDO,
-    ST_TELA_CADASTRO_ITEM_PEDIDO,
-    ST_TELA_LISTA_ITEM_PEDIDO,
-    ST_TELA_DETALHA_ITEM_PEDIDO,
-    ST_TELA_APAGA_ITEM_PEDIDO,
+    ST_MENU_PRINCIPAL,
+
+    ST_CLIENTE_PRINCIPAL,
+    ST_CLIENTE_CADASTRO,
+    ST_CLIENTE_LISTA,
+    ST_CLIENTE_DETALHES,
+    ST_CLIENTE_APAGAR,
+
+    ST_PRODUTO_PRINCIPAL,
+    ST_PRODUTO_CADASTRO,
+    ST_PRODUTO_LISTA,
+    ST_PRODUTO_DETALHES,
+    ST_PRODUTO_APAGAR,
+
+    ST_PEDIDO_PRINCIPAL,
+    ST_PEDIDO_CADASTRO,
+    ST_PEDIDO_LISTA,
+    ST_PEDIDO_DETALHES,
+    ST_PEDIDO_APAGAR,
+
+    ST_ITEM_PEDIDO_CADASTRO,
+    ST_ITEM_PEDIDO_LISTA,
+    ST_ITEM_PEDIDO_DETALHES,
+    ST_ITEM_PEDIDO_APAGAR,
+
+    ST_TELA_PEQUENA,
+    ST_CONFIGURACAO,
     ST_ERRO,
+
     ST_SAINDO
 } Estado;
 
@@ -37,9 +54,12 @@ typedef struct {
     MenuCallback acao;
 } ItemMenu;
 
+extern Estado estado_atual;
+
 // FUNÇÕES DE ESTADO
 
 Estado processaEstado(Estado st);
+
 void executaEstado();
 
 #endif
