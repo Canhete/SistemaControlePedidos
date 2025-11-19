@@ -1,20 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <ncurses.h>
-
-#define CPF_LENGTH 11
-#define CNPJ_LENGTH 14
-#define MAX_CLIENTES 100
+#include "../include/cliente.h"
+#include "../include/interface.h"
+#include "../include/estados.h"
 
 // Estrutura Cliente
-struct Cliente {
-    int codigo;
-    char tipo;
-    char nome[100];
-    char documento[15];
-};
+
+struct Cliente clientes[MAX_CLIENTES];
+int qtd_clientes = 0;
 
 // ---------------- VALIDAÇÃO CPF ----------------
 int validarCPF(char cpf[]) {
@@ -133,7 +124,7 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 }
 
 // ---------------- MENU PRINCIPAL ----------------
-int menuPrincipal() {
+void menuClientes() {
     const char *opcoes[] = {
         "Cadastrar Cliente",
         "Listar Clientes",
@@ -163,13 +154,28 @@ int menuPrincipal() {
             case KEY_DOWN:
                 escolha = (escolha < n_opcoes - 1) ? escolha + 1 : 0;
                 break;
-            case '\n':
-                return escolha;
+            case '\n': // Mudei isso aqui para permitir maior integração, infelizmente switchs aninhados quebram o código - Raphael
+                if(escolha == 0){
+                    // Mudar para função de cadastro, ideia é você abrir o arquivo para salvar já o cliente
+                    // Coloque a função de cadastro no estados.c para chamar o menu de cadastro, aqui apenas
+                    // chama o estado, a ação que do estado está no estados.c - Raphael
+                    estado_atual = ST_CLIENTE_CADASTRO;
+                    break;
+                } else if(escolha == 1){
+                    // Listar clientes, a mesma coisa, abrir o arquivo para ler os clientes cadastrados - Raphael
+                    estado_atual = ST_CLIENTE_LISTA;
+                    break;
+                } else {
+                    // Sair do menu, volta pro menu principal
+                    estado_atual = ST_MENU_PRINCIPAL;
+                    break;
+                }
         }
     }
 }
 
 // ---------------- MAIN ----------------
+/*
 int main() {
     struct Cliente clientes[MAX_CLIENTES];
     int qtd = 0;
@@ -190,3 +196,4 @@ int main() {
     printf("\nEncerrando o programa...\n");
     return 0;
 }
+*/

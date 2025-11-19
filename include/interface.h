@@ -40,6 +40,9 @@
 #define BUFFER_LINHA_LOGO 100         // Tamanho do buffer da logo
 #define QUANT_LINHAS_LOGO 10          // Quantidade de linhas da logo
 
+// Janela global para uso em todos estados
+extern WINDOW *win;
+
 /* FUNÇÕES DAS INTERFACE (cada uma é uma tela e/ou elemento gráfico) */
 
 void inicializaInterface();
@@ -58,6 +61,6 @@ void input_string(WINDOW *win, int y, int x, char *output, int maxlen);
 
 void animacaoAbertura();
 
-void menuPrincipal();
+void menuPrincipal(WINDOW *win);
 
 #endif

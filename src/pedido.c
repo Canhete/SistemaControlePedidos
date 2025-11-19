@@ -5,11 +5,6 @@
 #include "../include/utils.h"
 #include "../include/estados.h"
 
-/* Constates e definições */
-
-struct Pedido pedidoGlobal = {};
-struct ItemPedido itemPedidoGlobal = {};
-
 /* 
 Descrição de Cenários
 
@@ -31,6 +26,9 @@ Cadastrar Pedido - Descrição do fluxo principal/alternativo
 // ==========================================================================================
 //          FUNÇÕES DE CASO DE USO DOS PEDIDOS
 // ==========================================================================================
+
+struct Pedido pedidoGlobal;
+struct ItemPedido itemPedidoGlobal;
 
 void cadastrarPedido(WINDOW *win, struct Pedido *P){
     werase(win);
