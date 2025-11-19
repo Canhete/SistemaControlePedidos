@@ -303,7 +303,7 @@ void animacaoAbertura(){
 //                      MENU PRINCIPAL
 //  =========================================================
 
-void menuPrincipal(){
+void menuPrincipal(WINDOW *win){
     int linhasLogo = 0;
     char **logo = carregaLogo("public/logo.txt", &linhasLogo);
 
@@ -350,6 +350,7 @@ void menuPrincipal(){
 
         // A cada caracter obtido, a janela é atualizada
         wrefresh(janelaPrincipal);
+        win = janelaPrincipal;
 
         ch = getch();
 
@@ -365,18 +366,15 @@ void menuPrincipal(){
         } else if(ch == '\n' || ch == 10){ // ENTER
             switch(selecionado){
                 case 0:
-                    //estado_atual = ST_CLIENTE_PRINCIPAL;
-                    menuClientes();
+                    estado_atual = ST_CLIENTE_PRINCIPAL;
                     break;
 
                 case 1:
-                    //estado_atual = ST_PRODUTO_PRINCIPAL;
-                    //menuProdutos();
+                    estado_atual = ST_PRODUTO_PRINCIPAL;
                     break;
 
                 case 2:
-                    //estado_atual = ST_PEDIDO_PRINCIPAL;
-                    menuPedidos();
+                    estado_atual = ST_PEDIDO_PRINCIPAL;
                     break;
 
                 case 3:
