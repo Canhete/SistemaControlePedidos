@@ -7,8 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <ncurses.h>
 
 /* Estrutura de dados do Cliente */
+
+#define CPF_LENGTH 11
+#define CNPJ_LENGTH 14
+#define MAX_CLIENTES 100
+
+// Estrutura Cliente
 
 struct Cliente {
     int codigo;
@@ -16,6 +23,9 @@ struct Cliente {
     char nome[100];
     char documento[15]; 
 };
+
+extern struct Cliente cliente_global[MAX_CLIENTES];
+extern int qtd_clientes_global;
 
 /* FUNÇÕES DO CLIENTE */
 

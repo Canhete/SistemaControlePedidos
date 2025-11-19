@@ -1,20 +1,11 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <ncurses.h>
-
-#define CPF_LENGTH 11
-#define CNPJ_LENGTH 14
-#define MAX_CLIENTES 100
+#include "../include/cliente.h"
+#include "../include/interface.h"
 
 // Estrutura Cliente
-struct Cliente {
-    int codigo;
-    char tipo;
-    char nome[100];
-    char documento[15];
-};
+// Definição do armazenamento global de clientes (declared extern em cliente.h)
+struct Cliente cliente_global[MAX_CLIENTES];
+
+int qtd_clientes_global = 0;
 
 // ---------------- VALIDAÇÃO CPF ----------------
 int validarCPF(char cpf[]) {
@@ -67,7 +58,7 @@ int validarCNPJ(char cnpj[]) {
 
 // ---------------- CADASTRO ----------------
 void cadastrarCliente(struct Cliente clientes[], int *qtd) {
-    echo(); // habilita digitação visível
+    echo(); // habilita digitação visível...
     struct Cliente novo;
     novo.codigo = *qtd + 1;
 
@@ -106,7 +97,7 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd) {
 
     mvprintw(11, 2, "Cliente cadastrado com sucesso!");
     getch();
-    noecho(); // desabilita eco
+    noecho(); // desabilita eco...
 }
 
 // ---------------- LISTAR CLIENTES ----------------
@@ -133,7 +124,7 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 }
 
 // ---------------- MENU PRINCIPAL ----------------
-int menuPrincipal() {
+void menuClientes() {
     const char *opcoes[] = {
         "Cadastrar Cliente",
         "Listar Clientes",
@@ -141,10 +132,6 @@ int menuPrincipal() {
     };
     int escolha = 0;
     int n_opcoes = 3;
-
-    keypad(stdscr, TRUE);
-    noecho();
-    curs_set(0);
 
     while (1) {
         clear();
@@ -164,12 +151,19 @@ int menuPrincipal() {
                 escolha = (escolha < n_opcoes - 1) ? escolha + 1 : 0;
                 break;
             case '\n':
-                return escolha;
+                if(escolha == 0){
+                    cadastrarCliente(cliente_global, &qtd_clientes_global);
+                } else if (escolha == 1){
+                    listarClientes(cliente_global, qtd_clientes_global);
+                } else if (escolha == 2){
+                    break;
+                }
         }
     }
 }
 
 // ---------------- MAIN ----------------
+/*
 int main() {
     struct Cliente clientes[MAX_CLIENTES];
     int qtd = 0;
@@ -190,3 +184,4 @@ int main() {
     printf("\nEncerrando o programa...\n");
     return 0;
 }
+*/

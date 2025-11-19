@@ -58,7 +58,7 @@ extern Estado estado_atual;
 
 // FUNÇÕES DE ESTADO
 
-Estado processaEstado(Estado st);
+void processaEstado(Estado st);
 
 void executaEstado();
 
