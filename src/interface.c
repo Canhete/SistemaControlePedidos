@@ -1,19 +1,63 @@
 #include "../include/interface.h"
+#include "../include/estados.h"
+#include "../include/cliente.h"
+#include "../include/produto.h"
+#include "../include/pedido.h"
+#include "../include/utils.h"
 
 // ===========================================================
-//   FUNÇÕES UTILITARIAS, PODEM SER USADAS EM OUTROS PROGRAMAS
+// FUNÇÕES UTILITARIAS DE UI , PODEM SER USADAS EM OUTROS PROGRAMAS
 // ===========================================================
 
 void inicializaInterface(){
     initscr();              // Inicia a tela
     cbreak();               // Sai do loop se tiver algum erro no código
     noecho();               // Remove o cursor do terminal
-    keypad(stdscr, TRUE);   // Permite usar o teclado
+    keypad(stdscr, true);   // Permite usar o teclado
     curs_set(0);            // Oculta o cursor
 }
 
 void finalizaInterface(){
+    touchwin(stdscr);
+    clear();
+    refresh();
     endwin();
+}
+
+int ehTerminalPequeno(WINDOW *win, int altura_janela, int largura_janela){
+    // Obtenção do tamanho da tela e das cooredenadas de inicio
+    int altura, largura;
+    getmaxyx(stdscr, altura, largura);
+
+    // Obtém as dimensões da tela
+    char texto_do_tamanho[32];
+    snprintf(texto_do_tamanho, sizeof(texto_do_tamanho), "%dx%d", altura, largura);
+
+    // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
+    if(altura_janela < SCREEN_MIN_HEIGHT || largura_janela < SCREEN_MIN_WIDTH){
+        mvprintw(0, 0, "Terminal muito pequeno! %s", texto_do_tamanho);
+        refresh();
+        getch();
+        clear();
+        return 1;
+    }
+    return 0;
+}
+
+int input_int(WINDOW *win, int y, int x){
+    char buffer[BUFFER_LINHA_CARACTERES];
+    mvwgetnstr(win, y, x, buffer, BUFFER_LINHA_CARACTERES - 1);
+    return atoi(buffer);
+}
+
+double input_double(WINDOW *win, int y, int x){
+    char buffer[BUFFER_LINHA_CARACTERES];
+    mvwgetnstr(win, y, x, buffer, BUFFER_LINHA_CARACTERES - 1);
+    return atof(buffer);
+}
+
+void input_string(WINDOW *win, int y, int x, char *output, int maxlen){
+    mvwgetnstr(win, y, x, output, maxlen - 1);
 }
 
 //  =========================================================
@@ -83,7 +127,7 @@ static void desenhaLogo(WINDOW *win, char **logo, int linhas){
     int inicio_x = (largura - tamanhoMax) / 2;
     if(inicio_x < 1) inicio_x = 1;  // Largura minima
 
-    int inicio_y = 2;
+    int inicio_y = 5;
 
     for(int i=0; i<desenha_linhas; i++){
         int maxPrint = largura - 4;
@@ -105,7 +149,7 @@ static void desenhaBotoes(WINDOW *win, char *labels[], int total, int selecionad
 
     int largura_total = 0;
     for(int i=0; i<total; i++){
-        int len_botao = (int)strlen(labels[i] + 4);
+        int len_botao = (int)strlen(labels[i]) + 12;
         largura_total += len_botao;
     }
     largura_total += espacamento * (total - 1);
@@ -115,7 +159,7 @@ static void desenhaBotoes(WINDOW *win, char *labels[], int total, int selecionad
     if(inicio_x < 1) inicio_x = 1;
 
     // Vertical
-    int inicio_y = altura - 3;
+    int inicio_y = altura - 6;
     if(inicio_y < 1) inicio_y = 1;
 
     int x = inicio_x;
@@ -138,6 +182,124 @@ static void desenhaBotoes(WINDOW *win, char *labels[], int total, int selecionad
 }
 
 //  =========================================================
+//                      ABERTURA DO PROGRAMA
+//  =========================================================
+
+static int animaLogo(WINDOW *win, char **logo, int linhas, int delay_secs){
+    keypad(win, true);
+    nodelay(win, true);
+
+    int altura, largura;
+    getmaxyx(win, altura, largura);
+
+    char *botoesMenu[] = {
+        "Clientes",
+        "Produtos",
+        "Pedidos",
+        "Sair"
+    };
+
+    const int totalBotoes = 4;
+    int selecionado = 0;
+
+    // Linha de maior tamanho da logo, para definir o tamanho minimo que a logo deve ter para aparecer
+    int tamanhoMax = 0;
+    for(int i=0; i<linhas; i++){
+        int len = (int)strlen(logo[i]);
+        if(len > tamanhoMax) tamanhoMax = len;
+    }
+
+    // Redimensionamento da logo
+    int espaco_para_logo = altura - 6;
+    if(espaco_para_logo < 1) return 1; // Pula renderização se for pequeno
+
+    int desenha_linhas = linhas;
+    if(desenha_linhas > espaco_para_logo) desenha_linhas = espaco_para_logo;    // Altura minima
+
+    int inicio_x = (largura - tamanhoMax) / 2;
+    if(inicio_x < 1) inicio_x = 1;  // Largura minima
+
+    int inicio_y = 5;
+
+    int ch;
+    int interrompido = 0;
+
+    for(int i=0; i<desenha_linhas; i++){
+        ch = wgetch(win);
+        if(ch != ERR){
+            interrompido = 1;
+            break;
+        }
+
+        int maxPrint = largura - 4;
+        if(maxPrint <= 0) break;
+
+        mvwprintw(win, inicio_y + i, inicio_x, "%.*s", maxPrint, logo[i]);
+        wrefresh(win);
+
+        napms(delay_secs);
+    }
+
+    desenhaBotoes(win, botoesMenu, totalBotoes, selecionado);
+    napms(delay_secs);
+
+    nodelay(win, false);
+    return interrompido;
+}
+
+void animacaoAbertura(){
+    int linhasLogo = 0;
+    char **logo = carregaLogo("public/logo.txt", &linhasLogo);
+
+    erase();
+    refresh();
+
+    while(1){
+        // Obtenção do tamanho da tela e das cooredenadas de inicio
+        int altura, largura;
+        getmaxyx(stdscr, altura, largura);
+
+        // Imprime dimensões da tela no canto da tela
+        char texto_do_tamanho[32];
+        snprintf(texto_do_tamanho, sizeof(texto_do_tamanho), "%dx%d", altura, largura);
+
+        // Dimensões da janela
+        int altura_janela = altura - UI_MARGIN;
+        int largura_janela = largura - UI_MARGIN;
+        int posX_janela = UI_PADDING;
+        int posY_janela = UI_PADDING;
+
+        // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
+        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
+
+        WINDOW *janelaPrincipal = newwin(altura_janela, largura_janela, posX_janela, posY_janela);
+        keypad(stdscr, true);
+        box(janelaPrincipal, 0, 0);
+
+        // Desenho da UI
+        int pulou = animaLogo(janelaPrincipal, logo, linhasLogo, 250);
+
+        if(!pulou){
+            wrefresh(janelaPrincipal);
+            desenhaLogo(janelaPrincipal, logo, linhasLogo);
+        } else {
+            break;
+        }
+
+        mvwprintw(janelaPrincipal, altura_janela - UI_MARGIN, largura_janela - (int)strlen(texto_do_tamanho) - UI_MARGIN, "%s", texto_do_tamanho);
+        
+        wrefresh(janelaPrincipal);
+        delwin(janelaPrincipal);
+
+        // Sai automaticamente do loop afinal é uma animação
+        napms(500);
+        break;
+    }
+
+    if (logo) liberaLogo(logo, linhasLogo);
+}
+
+//  =========================================================
 //                      MENU PRINCIPAL
 //  =========================================================
 
@@ -153,6 +315,7 @@ void menuPrincipal(){
     };
     const int totalBotoes = 4;
     int selecionado = 0;
+    int ch;
 
     erase();
     refresh();
@@ -173,14 +336,8 @@ void menuPrincipal(){
         int posX_janela = UI_PADDING;
         int posY_janela = UI_PADDING;
 
-        // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (10x30)
-        if(altura_janela < SCREEN_MIN_HEIGHT || largura_janela < SCREEN_MIN_WIDTH){
-            mvprintw(0, 0, "Terminal muito pequeno %s", texto_do_tamanho);
-            refresh();
-            getch();
-            clear();
-            continue;
-        }
+        // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
+        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
 
         WINDOW *janelaPrincipal = newwin(altura_janela, largura_janela, posX_janela, posY_janela);
         box(janelaPrincipal, 0, 0);
@@ -194,7 +351,7 @@ void menuPrincipal(){
         // A cada caracter obtido, a janela é atualizada
         wrefresh(janelaPrincipal);
 
-        int ch = getch();
+        ch = getch();
 
         delwin(janelaPrincipal);
 
@@ -205,120 +362,33 @@ void menuPrincipal(){
         else if(ch == 'q' || ch == 'Q' || ch == 27) { // ESC
             selecionado = totalBotoes - 1; // Seleciona sair
             break;
+        } else if(ch == '\n' || ch == 10){ // ENTER
+            switch(selecionado){
+                case 0:
+                    //estado_atual = ST_CLIENTE_PRINCIPAL;
+                    menuClientes();
+                    break;
+
+                case 1:
+                    //estado_atual = ST_PRODUTO_PRINCIPAL;
+                    //menuProdutos();
+                    break;
+
+                case 2:
+                    //estado_atual = ST_PEDIDO_PRINCIPAL;
+                    menuPedidos();
+                    break;
+
+                case 3:
+                    estado_atual = ST_SAINDO;
+                    break;
+            }
         }
     }
 
     if (logo) liberaLogo(logo, linhasLogo);
 }
 
-void telaClientes();
-
-void telaProdutos();
-
-//  =========================================================
-//                      MENU PRINCIPAL
-//  =========================================================
-
-void telaPedidos(){
-    // Obtenção do tamanho da tela e das cooredenadas de inicio
-    int altura, largura; 
-    getmaxyx(stdscr, altura, largura);
-    int inicio_y = (LINES - altura) / 2;
-    int inicio_x = (COLS - largura) / 2;
-
-    // Janelas
-    WINDOW *JanelaMenu = newwin(altura, largura, inicio_y, inicio_x);
-    WINDOW *TituloPedidos = newwin(altura - 20, largura - 20, inicio_y, inicio_x);
-    WINDOW *JanelaOpcoes = newwin(altura - 5, largura - 5, inicio_y + 10, inicio_x);
-    WINDOW *JanelaEscolhas = newwin(altura - 5, largura - 10, inicio_y + 5, inicio_x + 5);
-
-    int escolha = 0;
-    int destacado = 0;
-    int ch;
-    const int NUM_OPCOES_PEDIDO = 5;
-    const int NUM_OPCOES_ITEM_PEDIDO = 4;
-
-    char *opcoesPedido[] = {
-        "Cadastrar Pedido",
-        "Listar Pedidos",
-        "Detalhar Pedido",
-        "Apagar Pedido",
-        "Sair"
-    };
-
-    char *opcoesItemPedido[] = {
-        "Cadastrar Item de Pedido",
-        "Listar Item de Pedidos",
-        "Apagar Item de Pedido",
-        "Sair"
-    };
-    
-    // Escreve em cada janela 
-    box(TituloPedidos, 0, 0);
-    mvwprintw(TituloPedidos, (altura - 5)/2, (largura - 2)/2, "Pedidos");
-    
-    while(1){
-        //desenha(JanelaEscolhas, destacado, opcoesPedido, NUM_OPCOES_PEDIDO);
-        ch = wgetch(JanelaEscolhas);
-
-        switch(ch){
-            case KEY_UP:
-                if (destacado > 0) destacado--;
-                break;
-
-            case KEY_DOWN:
-                if (destacado < NUM_OPCOES_PEDIDO - 1) destacado++;
-                break;
-
-            case 10: // ENTER não funciona por algum motivo lol
-                escolha = destacado;
-                break;
-
-            case 'q':
-            case 'Q':
-                escolha = NUM_OPCOES_PEDIDO - 1;
-                break;
-        }
-        if (ch == 10 || ch == 'q' || ch == 'Q' && escolha == NUM_OPCOES_PEDIDO - 1) break;  // Sair 
-        else { 
-            clear(); 
-            attron(COLOR_PAIR(1) | A_BOLD); 
-            mvprintw(LINES/2, (COLS - 30)/2, "Você escolheu: %s", opcoesPedido[escolha]); 
-            attroff(COLOR_PAIR(1) | A_BOLD); 
-            mvprintw(LINES/2 + 2, (COLS - 30)/2, "Pressione qualquer tecla..."); 
-            refresh(); 
-        }
-
-        // Exemplo de animação simples 
-        for (int i = 0; i < 5; i++) { 
-            wclear(JanelaOpcoes); 
-            box(JanelaOpcoes, 0, 0); 
-            mvwprintw(JanelaOpcoes, 0, 2, "[ Janela de Status ]"); 
-            mvwprintw(JanelaOpcoes, 3, 2, "Atualizando: %d/5", i + 1); 
-            wrefresh(JanelaOpcoes); 
-            napms(500);  // Pausa de 500ms 
-        }
-        
-        mvwprintw(JanelaOpcoes, 5, 2, "Concluído! Pressione qualquer tecla..."); 
-        wrefresh(JanelaOpcoes);
-        getchar();
-
-        // Libera memória das janelas 
-        delwin(JanelaMenu); 
-        delwin(JanelaEscolhas); 
-        delwin(JanelaOpcoes); 
-        endwin();
-    }
-}
-
-// TESTES
-
-int main(){
-    inicializaInterface();
-
-    menuPrincipal();
-
-    finalizaInterface();
-
-    return 0;
+void menuConfiguracao(){
+    // Implementação futura
 }

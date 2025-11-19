@@ -5,27 +5,36 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "cliente.h"    // Importa struct de cliente
 #include "produto.h"    // Importa struct de produto
-#include "pedido.h"     // Importa o struct pedido
 
-/* DEFINIÇÕES & CONSTANTES */
+struct Pedido;         // Forward declaration da struct Pedido
+struct ItemPedido;     // Forward declaration da struct ItemPedido
 
-#define NOME_ARQUIVO_CLIENTE "cliente.csv"          // Nome padrão do arquivo de clientes
-#define NOME_ARQUIVO_PRODUTO "produto.csv"          // Nome padrão do arquivo de produtos
-#define NOME_ARQUIVO_PEDIDO "pedido.csv"            // Nome padrão do arquivo de pedidos
-#define NOME_ARQUIVO_ITEM_PEDIDO "item_pedido.csv"  // Nome padrão do arquivo de itens de pedidos
-#define NOME_ARQUIVO_TEMP "temp.csv"                // Nome padrão do arquivo temporário (usado para copiar informações de um arquivo para o outro e apagar um dado específico)
-#define BUFFER_ARQUIVO_LINHA 512                    // Tamanho máximo de caracteres de uma linha, usado para ler linhas
+/* DEFINIÇÕES, CONSTANTES & DIRETÓRIOS */
 
-/* FUNÇÕES */
+#define DIRETORIO_ARQUIVO_PEDIDO "data/pedido.csv"              // Diretório padrão do arquivo de clientes
+#define DIRETORIO_ARQUIVO_PRODUTO "data/produto.csv"            // Diretório padrão do arquivo de produtos
+#define DIRETORIO_ARQUIVO_PEDIDO "data/pedido.csv"              // Diretório padrão do arquivo de pedidos
+#define DIRETORIO_ARQUIVO_ITEM_PEDIDO "data/item_pedido.csv"    // Diretório padrão do arquivo de itens de pedidos
+#define DIRETORIO_ARQUIVO_TEMP "data/temp.csv"                  // Diretório padrão do arquivo temporário (usado para copiar informações de um arquivo para o outro e apagar um dado específico)
+#define BUFFER_ARQUIVO_LINHA 512                                // Tamanho máximo de caracteres de uma linha, usado para ler linhas
 
-void guardarPedido(struct Pedido *P);
+/* FUNÇÕES PEDIDO */
 
-void guardarItemPedido(struct ItemPedido *IP);
+int guardarPedido(struct Pedido *P, char *mensagem);
 
-void apagarPedido(int idParaRemover);
+int apagarPedido(int idParaRemover, char *mensagem);
 
-void apagarItemPedido(int idParaRemover);
+int apagarTodosPedidosDoCliente(int idDoCliente, char *mensagem);
+
+/* FUNÇÕES ITEM DE PEDIDO */
+
+int guardarItemPedido(struct ItemPedido *IP, char *mensagem);
+
+int apagarItemPedido(int idParaRemover, char *mensagem);
+
+int apagarTodosItensDoPedido(int idDoPedido, char *mensagem);
 
 #endif

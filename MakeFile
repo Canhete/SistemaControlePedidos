@@ -37,16 +37,20 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(CC) $(CFLAGS) -c $< -o $@
 
 # Limpa arquivos compilados
-clean: rm -rf $(BUILD_DIR) @echo "Limpeza concluída."
+clean:
+	rm -rf $(BUILD_DIR)
+	@echo "Limpeza concluída."
 
 # Executa o programa (depois de compilar)
-run: all @echo "Executando o Sistema de Controle de Pedidos..." @$(EXEC)
+run: all
+	@echo "Executando o Sistema Controle de Pedidos..."
+	@$(EXEC)
 
 # Mostra ajuda
 help:
-@echo "Comandos disponíveis:"
-@echo " make → compila o projeto"
-@echo " make run → compila e executa"
-@echo " make clean → remove arquivos compilados"
-@echo " make help → mostra esta ajuda"
-.PHONY: all clean run help dirs
+	@echo "Comandos disponíveis:"
+	@echo " make → compila o projeto"
+	@echo " make run → compila e executa"
+	@echo " make clean → remove arquivos compilados"
+	@echo " make help → mostra esta ajuda"
+	.PHONY: all clean run help dirs

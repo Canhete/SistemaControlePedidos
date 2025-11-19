@@ -1,20 +1,5 @@
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "produto.h"
-
-#define PRODUTO_H
-
-#define MAX_PRODUTOS 100
-#define DESCRICAO_TAMANHO 100
-
-struct Produto {
-    int id;
-    char descricao[DESCRICAO_TAMANHO];
-    double preco;
-    int estoque;
-};
+#include "../include/produto.h"
 
 void inserirProduto(Produto produtos[], int *quantidade) {
     if (*quantidade >= MAX_PRODUTOS) {
@@ -113,10 +98,12 @@ void removerProduto(Produto produtos[], int *quantidade) {
     }
     
     // verificar se o produto está em algum pedido
+    /* IMPLEMENTAR ESSA FUNÇÃO DEPOIS
     if (produtoExisteEmPedidos(id)) {
         printf("Erro: Produto não pode ser removido pois está em pedidos!\n");
         return;
     }
+    */
     
     // confirmar remoção
     printf("Produto a ser removido:\n");

@@ -145,7 +145,7 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
 // --------------------> FUNÇÃO PRINCIPAL <-------------------- //
 
-int main() {
+void menuClientes() {
     struct Cliente clientes[MAX_CLIENTES];
     int qtd = 0;
     int opcao;
@@ -172,6 +172,4 @@ int main() {
                 printf("Opção inválida.\n");
         }
     } while (opcao != 0);
-
-    return 0;
 }

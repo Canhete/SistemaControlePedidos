@@ -8,10 +8,9 @@ utilidade para o programa */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "persistencia.h"
-#include "cliente.h"
-#include "produto.h"
-#include "pedido.h"
+
+struct Pedido;
+struct ItemPedido;
 
 /* DEFINIÇÕES E CONSTANTES */
 
@@ -21,10 +20,18 @@ utilidade para o programa */
 
 const char* obterDataAtual();
 
-int validarIdPedido(int id);
+int validarIdPedidoObtido(int id, char *mensagem);
 
-int validarIdCliente(int id);
+int validarIdItemPedidoObtido(int id, char *mensagem);
 
-int validarData(char data);
+int validarIdClienteObtido(int id, char *mensagem);
+
+int validarData(char *data, char *mensagem);
+
+int validarSubtotalObtido(double subtotal, char *mensagem);
+
+int validarTotalObtido(double total, char *mensagem);
+
+int validarQuantidadeObtida(int quantidade, char *mensagem);
 
 #endif

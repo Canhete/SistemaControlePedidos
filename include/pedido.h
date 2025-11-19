@@ -3,14 +3,14 @@
 
 /* Bibliotecas */
 
-#include "persistencia.h"
-#include "utils.h"
-#include "estados.h"
-#include "interface.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-/* Constantes e definições */
-
-
+#include "interface.h" // Importa funções de interface
+#include "utils.h" // Importa funções utilitárias
+#include "cliente.h" // Importa funções relacionadas a clientes
+#include "produto.h" // Importa funções relacionadas a produtos
+#include "estados.h" // Importa estados do sistema
 
 /* Estrutura de dados do Pedido */
 
@@ -30,23 +30,29 @@ struct ItemPedido {
 
 /* PEDIDO */
 
-void cadastrarPedido(struct Pedido *P);
+void cadastrarPedido(WINDOW *win, struct Pedido *P);
 
-void listarPedidos();
+void listarPedidos(WINDOW *win);
 
-void removerPedido();
+int analisarPedido(int idDoPedido, int idDoCliente, char *mensagem);
 
-int analisarPedido(int idDoPedido);
+void removerPedido(WINDOW *win);
 
-int analisarItemPedido(int idDoItemPedido);
+void detalharPedido(WINDOW *win);
 
-void detalharPedido();
 
 /* ITEM DE PEDIDOS */
 
-void cadastrarItemPedido(struct ItemPedido *IP);
+void cadastrarItemPedido(WINDOW *win, struct ItemPedido *IP);
 
-void removerItemPedido(struct ItemPedido *IP);
+void listarItemPedidos(WINDOW *win);
 
+int analisarItemPedido(int idDoItemPedido, char *mensagem);
+
+void removerItemPedido(WINDOW *win, struct ItemPedido *IP);
+
+/* Interface */
+
+void menuPedidos();
 
 #endif

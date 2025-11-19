@@ -5,18 +5,18 @@
 
 #include <ncurses.h>
 #include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <ctype.h>
-#include "persistencia.h"
-#include "estados.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "interface.h"
 
 /* DEFINIÇÕES & CONSTANTES */
 
-#define SCREEN_MIN_WIDTH   30   // Largura da tela
-#define SCREEN_MIN_HEIGHT  10   // Altura da tela
+#define SCREEN_MIN_WIDTH   60   // Largura da tela
+#define SCREEN_MIN_HEIGHT  20   // Altura da tela
 
 #define UI_INDENT      4    // Identação
 #define UI_RECUO       3    // Récuo
@@ -43,18 +43,21 @@
 /* FUNÇÕES DAS INTERFACE (cada uma é uma tela e/ou elemento gráfico) */
 
 void inicializaInterface();
+
 void finalizaInterface();
+
+int ehTerminalPequeno(WINDOW *win, int altura_janela, int largura_janela);
+
+int input_int(WINDOW *win, int y, int x);
+
+double input_double(WINDOW *win, int y, int x);
+
+void input_string(WINDOW *win, int y, int x, char *output, int maxlen);
 
 /* TODOS STATES DE INTERFACE */
 
+void animacaoAbertura();
+
 void menuPrincipal();
-
-/*
-Estado telaClientes();
-
-Estado telaProdutos();
-
-Estado telaPedidos();
-*/
 
 #endif
