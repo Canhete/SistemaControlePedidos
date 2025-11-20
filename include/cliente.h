@@ -9,11 +9,13 @@
 #include <ctype.h>
 #include <ncurses.h>
 
+/* Estrutura de dados do Cliente */
+
 #define CPF_LENGTH 11
 #define CNPJ_LENGTH 14
 #define MAX_CLIENTES 100
 
-/* Estrutura de dados do Cliente */
+// Estrutura Cliente
 
 struct Cliente {
     int codigo;

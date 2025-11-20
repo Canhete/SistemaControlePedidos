@@ -359,7 +359,6 @@ void menuPrincipal(WINDOW *win){
         // Controle dos botões, ENTER confirma e sai do loop
         if(ch == KEY_LEFT && selecionado > 0) selecionado--;
         else if(ch == KEY_RIGHT && selecionado < totalBotoes - 1) selecionado++;
-        else if(ch == '\n') break;
         else if(ch == 'q' || ch == 'Q' || ch == 27) { // ESC
             selecionado = totalBotoes - 1; // Seleciona sair
             break;
@@ -381,6 +380,7 @@ void menuPrincipal(WINDOW *win){
                     estado_atual = ST_SAINDO;
                     break;
             }
+            break;
         }
     }
 
