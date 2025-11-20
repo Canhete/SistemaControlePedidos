@@ -24,8 +24,9 @@ struct Cliente {
     char documento[15]; 
 };
 
-extern struct Cliente cliente_global[MAX_CLIENTES];
-extern int qtd_clientes_global;
+// Struct cliente global, para usar em todas funções - Raphael
+extern struct Cliente clientes[MAX_CLIENTES];
+extern int qtd_clientes;
 
 /* FUNÇÕES DO CLIENTE */
 

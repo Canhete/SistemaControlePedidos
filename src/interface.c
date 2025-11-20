@@ -303,7 +303,7 @@ void animacaoAbertura(){
 //                      MENU PRINCIPAL
 //  =========================================================
 
-void menuPrincipal(){
+void menuPrincipal(WINDOW *win){
     int linhasLogo = 0;
     char **logo = carregaLogo("public/logo.txt", &linhasLogo);
 
@@ -350,6 +350,7 @@ void menuPrincipal(){
 
         // A cada caracter obtido, a janela é atualizada
         wrefresh(janelaPrincipal);
+        win = janelaPrincipal;
 
         ch = getch();
 

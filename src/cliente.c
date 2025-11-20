@@ -3,10 +3,9 @@
 #include "../include/estados.h"
 
 // Estrutura Cliente
-// Definição do armazenamento global de clientes (declared extern em cliente.h)
-struct Cliente cliente_global[MAX_CLIENTES];
 
-int qtd_clientes_global = 0;
+struct Cliente clientes[MAX_CLIENTES];
+int qtd_clientes = 0;
 
 // ---------------- VALIDAÇÃO CPF ----------------
 int validarCPF(char cpf[]) {
@@ -126,7 +125,6 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
 // ---------------- MENU PRINCIPAL ----------------
 void menuClientes() {
-
     const char *opcoes[] = {
         "Cadastrar Cliente",
         "Listar Clientes",
@@ -167,6 +165,22 @@ void menuClientes() {
                     break;
                 }
                 break;
+            case '\n': // Mudei isso aqui para permitir maior integração, infelizmente switchs aninhados quebram o código - Raphael
+                if(escolha == 0){
+                    // Mudar para função de cadastro, ideia é você abrir o arquivo para salvar já o cliente
+                    // Coloque a função de cadastro no estados.c para chamar o menu de cadastro, aqui apenas
+                    // chama o estado, a ação que do estado está no estados.c - Raphael
+                    estado_atual = ST_CLIENTE_CADASTRO;
+                    break;
+                } else if(escolha == 1){
+                    // Listar clientes, a mesma coisa, abrir o arquivo para ler os clientes cadastrados - Raphael
+                    estado_atual = ST_CLIENTE_LISTA;
+                    break;
+                } else {
+                    // Sair do menu, volta pro menu principal
+                    estado_atual = ST_MENU_PRINCIPAL;
+                    break;
+                }
         }
     }
 }
