@@ -6,19 +6,9 @@
 #include "../include/utils.h"
 
 int main(){
-    /*estado_atual = ST_ABRINDO;
+    estado_atual = ST_ABRINDO;
 
-    while(estado_atual != ST_SAINDO){
-        estado_atual = processaEstado(estado_atual);
-    }
-    */
-
-    inicializaInterface();
-    
-    animacaoAbertura();
-    menuPrincipal();
-
-    finalizaInterface();
+    executaEstado();
 
     return 0;
 }

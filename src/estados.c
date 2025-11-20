@@ -14,32 +14,65 @@ void processaEstado(Estado st){
     switch(st){
         case ST_ABRINDO:
             inicializaInterface();
+            estado_atual = ST_MENU_PRINCIPAL;
+            break;
 
         case ST_MENU_PRINCIPAL:
             animacaoAbertura();
             menuPrincipal();
+            break;
+        
+        // =========================================================
+        //                  ESTADOS CLIENTE
+        // =========================================================
 
         case ST_CLIENTE_PRINCIPAL:
             menuClientes();
+            break;
+
+        case ST_CLIENTE_CADASTRO:
+            cadastrarCliente(cliente_global, &qtd_clientes_global);
+            break;
+
+        case ST_CLIENTE_LISTA:
+            listarClientes(cliente_global, qtd_clientes_global);
+            break;
+
+        case ST_CLIENTE_APAGAR:
+            //apagarCliente();
+            break;
+
+        // =========================================================
+        //                  ESTADOS PRODUTO
+        // =========================================================
 
         case ST_PRODUTO_PRINCIPAL:
             //menuProdutos();
+            break;
+
+        // =========================================================
+        //                  ESTADOS PEDIDO
+        // =========================================================
 
         case ST_PEDIDO_PRINCIPAL:
             menuPedidos();
+            break;
 
         case ST_CONFIGURACAO:
             //menuConfiguracao();
+            break;
 
         case ST_SAINDO:
             finalizaInterface();
             printf("Programa finalizado com sucesso!\n");
             exit(EXIT_SUCCESS);
+            break;
 
         case ST_ERRO:
             finalizaInterface();
             printf("Ocorreu um erro inesperado! O programa será encerrado.\n");
             exit(EXIT_FAILURE);
+            break;
 
         default:
     }

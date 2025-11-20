@@ -358,31 +358,28 @@ void menuPrincipal(){
         // Controle dos botões, ENTER confirma e sai do loop
         if(ch == KEY_LEFT && selecionado > 0) selecionado--;
         else if(ch == KEY_RIGHT && selecionado < totalBotoes - 1) selecionado++;
-        else if(ch == '\n') break;
         else if(ch == 'q' || ch == 'Q' || ch == 27) { // ESC
             selecionado = totalBotoes - 1; // Seleciona sair
             break;
         } else if(ch == '\n' || ch == 10){ // ENTER
             switch(selecionado){
                 case 0:
-                    //estado_atual = ST_CLIENTE_PRINCIPAL;
-                    menuClientes();
+                    estado_atual = ST_CLIENTE_PRINCIPAL;
                     break;
 
                 case 1:
-                    //estado_atual = ST_PRODUTO_PRINCIPAL;
-                    //menuProdutos();
+                    estado_atual = ST_PRODUTO_PRINCIPAL;
                     break;
 
                 case 2:
-                    //estado_atual = ST_PEDIDO_PRINCIPAL;
-                    menuPedidos();
+                    estado_atual = ST_PEDIDO_PRINCIPAL;
                     break;
 
                 case 3:
                     estado_atual = ST_SAINDO;
                     break;
             }
+            break;
         }
     }
 

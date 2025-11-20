@@ -1,5 +1,6 @@
 #include "../include/cliente.h"
 #include "../include/interface.h"
+#include "../include/estados.h"
 
 // Estrutura Cliente
 // Definição do armazenamento global de clientes (declared extern em cliente.h)
@@ -125,6 +126,7 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
 // ---------------- MENU PRINCIPAL ----------------
 void menuClientes() {
+
     const char *opcoes[] = {
         "Cadastrar Cliente",
         "Listar Clientes",
@@ -135,29 +137,36 @@ void menuClientes() {
 
     while (1) {
         clear();
+        refresh();
+
         mvprintw(1, 2, "==== MENU CLIENTES ====");
         for (int i = 0; i < n_opcoes; i++) {
             if (i == escolha) attron(A_REVERSE);
             mvprintw(3 + i, 4, "%d - %s", i + 1, opcoes[i]);
             if (i == escolha) attroff(A_REVERSE);
         }
+        refresh();
 
         int ch = getch();
-        switch (ch) {
-            case KEY_UP:
-                escolha = (escolha > 0) ? escolha - 1 : n_opcoes - 1;
-                break;
-            case KEY_DOWN:
-                escolha = (escolha < n_opcoes - 1) ? escolha + 1 : 0;
-                break;
-            case '\n':
-                if(escolha == 0){
-                    cadastrarCliente(cliente_global, &qtd_clientes_global);
-                } else if (escolha == 1){
-                    listarClientes(cliente_global, qtd_clientes_global);
-                } else if (escolha == 2){
+        if(ch == KEY_UP) {
+            escolha = (escolha > 0) ? escolha - 1 : n_opcoes - 1;
+        } else if(ch == KEY_DOWN) {
+            escolha = (escolha < n_opcoes - 1) ? escolha + 1 : 0;
+        } else if(ch == '\n' || ch == 10) {
+            switch (escolha) {
+                case 0:
+                    estado_atual = ST_CLIENTE_CADASTRO;
+                    break;
+
+                case 1:
+                    estado_atual = ST_CLIENTE_LISTA;
+                    break;
+                    
+                case 2:
+                    estado_atual = ST_MENU_PRINCIPAL;
                     break;
                 }
+                break;
         }
     }
 }
