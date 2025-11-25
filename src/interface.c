@@ -159,7 +159,7 @@ static void desenhaBotoes(WINDOW *win, char *labels[], int total, int selecionad
     if(inicio_x < 1) inicio_x = 1;
 
     // Vertical
-    int inicio_y = altura - 6;
+    int inicio_y = altura - 8;
     if(inicio_y < 1) inicio_y = 1;
 
     int x = inicio_x;
@@ -192,12 +192,14 @@ static int animaLogo(WINDOW *win, char **logo, int linhas, int delay_secs){
     int altura, largura;
     getmaxyx(win, altura, largura);
 
+    /*
     char *botoesMenu[] = {
         "Clientes",
         "Produtos",
         "Pedidos",
         "Sair"
     };
+    */
 
     const int totalBotoes = 4;
     int selecionado = 0;
@@ -240,8 +242,8 @@ static int animaLogo(WINDOW *win, char **logo, int linhas, int delay_secs){
         napms(delay_secs);
     }
 
-    desenhaBotoes(win, botoesMenu, totalBotoes, selecionado);
-    napms(delay_secs);
+    //desenhaBotoes(win, botoesMenu, totalBotoes, selecionado);
+    //napms(delay_secs);
 
     nodelay(win, false);
     return interrompido;
@@ -276,9 +278,10 @@ void animacaoAbertura(){
         keypad(stdscr, true);
         box(janelaPrincipal, 0, 0);
 
-        // Desenho da UI
-        int pulou = animaLogo(janelaPrincipal, logo, linhasLogo, 250);
+        // Desenho da UI, a logo é animada até o fim, qualquer tecla que for apertada cancela a animação
+        int pulou = animaLogo(janelaPrincipal, logo, linhasLogo, DELAY_ANIMACAO);
 
+        // Se qualquer não for pulada no fim renderiza, a logo do menu normalmente
         if(!pulou){
             wrefresh(janelaPrincipal);
             desenhaLogo(janelaPrincipal, logo, linhasLogo);
@@ -346,6 +349,7 @@ void menuPrincipal(WINDOW *win){
         desenhaLogo(janelaPrincipal, logo, linhasLogo);
         desenhaBotoes(janelaPrincipal, botoesMenu, totalBotoes, selecionado);
 
+        // Imprime o tamanho da tela no canto
         mvwprintw(janelaPrincipal, altura_janela - UI_MARGIN, largura_janela - (int)strlen(texto_do_tamanho) - UI_MARGIN, "%s", texto_do_tamanho);
 
         // A cada caracter obtido, a janela é atualizada
@@ -359,7 +363,7 @@ void menuPrincipal(WINDOW *win){
         // Controle dos botões, ENTER confirma e sai do loop
         if(ch == KEY_LEFT && selecionado > 0) selecionado--;
         else if(ch == KEY_RIGHT && selecionado < totalBotoes - 1) selecionado++;
-        else if(ch == 'q' || ch == 'Q' || ch == 27) { // ESC
+        else if(ch == 'q' || ch == 'Q' || ch == 27) { // Q e ESC saem do programa
             selecionado = totalBotoes - 1; // Seleciona sair
             break;
         } else if(ch == '\n' || ch == 10){ // ENTER

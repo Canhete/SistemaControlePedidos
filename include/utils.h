@@ -20,18 +20,27 @@ struct ItemPedido;
 
 const char* obterDataAtual();
 
-int validarIdPedidoObtido(int id, char *mensagem);
+/* PEDIDO */
+// Como funciona? Você fornece o parâmetro do campo e cada função verifica se existe no banco de dados, se não existe, retorna um número diferente de 1, com uma mensagem de erro.
 
-int validarIdItemPedidoObtido(int id, char *mensagem);
+int validarQuantidade(int quantidade, char *mensagem);
 
-int validarIdClienteObtido(int id, char *mensagem);
+int validarIdPedido(int id, char *mensagem);
 
-int validarData(char *data, char *mensagem);
+int validarIdCliente(int codigoVerificado, char *mensagem);
 
-int validarSubtotalObtido(double subtotal, char *mensagem);
+int validarIdProduto(int id, char *mensagem);
 
-int validarTotalObtido(double total, char *mensagem);
+int validarData(const char *dataVerificada, char *mensagem);
 
-int validarQuantidadeObtida(int quantidade, char *mensagem);
+int validarTotal(double total, char *mensagem);
+
+int validarIdItemPedido(int id, char *mensagem);
+
+int validarSubTotal(double total, char *mensagem);
+
+int validarQuantidade(int quantidade, char *mensagem);
+
+void formatarDataPadrao(int dia, int mes, int ano, char *out);
 
 #endif

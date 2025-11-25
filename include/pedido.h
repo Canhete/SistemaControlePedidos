@@ -38,26 +38,33 @@ extern struct ItemPedido itemPedidoGlobal;
 
 /* PEDIDO */
 
-void cadastrarPedido(WINDOW *win, struct Pedido *P);
+void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP);
 
 void listarPedidos(WINDOW *win);
 
-int analisarPedido(int idDoPedido, int idDoCliente, char *mensagem);
-
 void removerPedido(WINDOW *win);
 
-void detalharPedido(WINDOW *win);
+void removerTodosPedidos(WINDOW *win);
 
+void consultarPedido(WINDOW *win);
 
 /* ITEM DE PEDIDOS */
 
-void cadastrarItemPedido(WINDOW *win, struct ItemPedido *IP);
-
-void listarItemPedidos(WINDOW *win);
+void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP);
 
 int analisarItemPedido(int idDoItemPedido, char *mensagem);
 
-void removerItemPedido(WINDOW *win, struct ItemPedido *IP);
+void removerItemPedido(WINDOW *win);
+
+void listarItemPedidosDoPedido(WINDOW *win, int idPedido);
+
+void listarTodosItensPedidos(WINDOW *win);
+
+/* Cálculos */
+
+int calcularTotal(struct Pedido *P, char *mensagem);
+
+int calcularSubtotal(struct ItemPedido *IP, char *mensagem);
 
 /* Interface */
 

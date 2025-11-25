@@ -14,7 +14,7 @@ struct ItemPedido;     // Forward declaration da struct ItemPedido
 
 /* DEFINIÇÕES, CONSTANTES & DIRETÓRIOS */
 
-#define DIRETORIO_ARQUIVO_PEDIDO "data/pedido.csv"              // Diretório padrão do arquivo de clientes
+#define DIRETORIO_ARQUIVO_CLIENTE "data/cliente.csv"            // Diretório padrão do arquivo de clientes
 #define DIRETORIO_ARQUIVO_PRODUTO "data/produto.csv"            // Diretório padrão do arquivo de produtos
 #define DIRETORIO_ARQUIVO_PEDIDO "data/pedido.csv"              // Diretório padrão do arquivo de pedidos
 #define DIRETORIO_ARQUIVO_ITEM_PEDIDO "data/item_pedido.csv"    // Diretório padrão do arquivo de itens de pedidos
@@ -23,11 +23,17 @@ struct ItemPedido;     // Forward declaration da struct ItemPedido
 
 /* FUNÇÕES PEDIDO */
 
+int criarArquivoPedido(char *mensagem);
+
 int guardarPedido(struct Pedido *P, char *mensagem);
+
+int analisarPedido(int idDoPedido, char *mensagem);
 
 int apagarPedido(int idParaRemover, char *mensagem);
 
 int apagarTodosPedidosDoCliente(int idDoCliente, char *mensagem);
+
+int apagarTodosPedidosExistentes(char *mensagem);
 
 /* FUNÇÕES ITEM DE PEDIDO */
 
@@ -36,5 +42,7 @@ int guardarItemPedido(struct ItemPedido *IP, char *mensagem);
 int apagarItemPedido(int idParaRemover, char *mensagem);
 
 int apagarTodosItensDoPedido(int idDoPedido, char *mensagem);
+
+int apagarTodosItensPedidoExistentes(char *mensagem);
 
 #endif

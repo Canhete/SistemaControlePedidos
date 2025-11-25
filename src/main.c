@@ -10,5 +10,7 @@ int main(){
 
     executaEstado();
 
+    finalizaInterface();
+
     return 0;
 }

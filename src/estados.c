@@ -8,20 +8,23 @@
 //  CADA ESTADO IMPLICA NUMA FUNÇÃO ESPECIFICA, ESSA FUNÇÃO FAZ ISSO E DISTRIBUI CADA ESTADO PARA UMA FUNÇÃO
 // ===============================================================================================================
 
-struct Cliente; // Declaração externa do array de clientes
-int qtd_cliente;           // Declaração externa da quantidade de clientes
+struct Cliente;         // Declaração externa do array de clientes
+int qtd_cliente;        // Declaração externa da quantidade de clientes
 
-Estado estado_atual; // Declaração externa do estado atual
-WINDOW *win;    // Declaração externa da janela global
+Estado estado_atual;    // Declaração externa do estado atual
+WINDOW *win;            // Declaração externa da janela global
 
 void processaEstado(Estado st){
     switch(st){
         case ST_ABRINDO:
             inicializaInterface();
+            estado_atual = ST_MENU_PRINCIPAL;
+            break;
 
         case ST_MENU_PRINCIPAL:
             animacaoAbertura();
             menuPrincipal(win);
+            break;
 
         // ================================================
         //               MENU CLIENTE
@@ -29,12 +32,15 @@ void processaEstado(Estado st){
 
         case ST_CLIENTE_PRINCIPAL:
             menuClientes();
+            break;
 
         case ST_CLIENTE_CADASTRO:
             cadastrarCliente(clientes, &qtd_clientes);
+            break;
 
         case ST_CLIENTE_LISTA:
             listarClientes(clientes, qtd_clientes);
+            break;
 
         // ================================================
         //               MENU PRODUTO
@@ -42,6 +48,7 @@ void processaEstado(Estado st){
 
         case ST_PRODUTO_PRINCIPAL:
             //menuProdutos();
+            break;
 
         // ================================================
         //               MENU PEDIDO
@@ -49,30 +56,35 @@ void processaEstado(Estado st){
 
         case ST_PEDIDO_PRINCIPAL:
             menuPedidos();
+            break;
 
         case ST_PEDIDO_CADASTRO:
-            cadastrarPedido(win, &pedidoGlobal);
+            break;
 
         case ST_PEDIDO_LISTA:
-            listarPedidos(win);
+            break;
 
-        case ST_PEDIDO_DETALHES:
-            detalharPedido(win);
+        case ST_PEDIDO_CONSULTA:
+            break;
 
         case ST_PEDIDO_APAGAR:
-            removerPedido(win);
+            break;
+
+        // ================================================
+        //              ITEM DE PEDIDOS
+        // ================================================
 
         case ST_ITEM_PEDIDO_CADASTRO:
-            cadastrarItemPedido(win, &itemPedidoGlobal);
+            break;
 
         case ST_ITEM_PEDIDO_LISTA:
-            listarItemPedidos(win);
+            break;
 
-        case ST_ITEM_PEDIDO_DETALHES:
-            //detalharItemPedido(win);
+        case ST_ITEM_PEDIDO_CONSULTA:
+            break;
 
         case ST_ITEM_PEDIDO_APAGAR:
-            removerItemPedido(win, &itemPedidoGlobal);
+            break;
 
         // ================================================
         //               MENU OUTROS
@@ -80,22 +92,25 @@ void processaEstado(Estado st){
 
         case ST_CONFIGURACAO:
             //menuConfiguracao();
+            break;
 
         case ST_SAINDO:
             finalizaInterface();
             printf("Programa finalizado com sucesso!\n");
             exit(EXIT_SUCCESS);
+            break;
 
         case ST_ERRO:
             finalizaInterface();
             printf("Ocorreu um erro inesperado! O programa será encerrado.\n");
             exit(EXIT_FAILURE);
+            break;
 
         default:
-            estado_atual = ST_ERRO;
             finalizaInterface();
             printf("Estado desconhecido! O programa será encerrado.\n");
             exit(EXIT_FAILURE);
+            break;
     }
 }
 
