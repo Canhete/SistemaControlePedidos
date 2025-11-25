@@ -30,12 +30,12 @@ typedef enum {
     ST_PEDIDO_PRINCIPAL,
     ST_PEDIDO_CADASTRO,
     ST_PEDIDO_LISTA,
-    ST_PEDIDO_DETALHES,
+    ST_PEDIDO_CONSULTA,
     ST_PEDIDO_APAGAR,
 
     ST_ITEM_PEDIDO_CADASTRO,
     ST_ITEM_PEDIDO_LISTA,
-    ST_ITEM_PEDIDO_DETALHES,
+    ST_ITEM_PEDIDO_CONSULTA,
     ST_ITEM_PEDIDO_APAGAR,
 
     ST_TELA_PEQUENA,
@@ -44,15 +44,6 @@ typedef enum {
 
     ST_SAINDO
 } Estado;
-
-/* Cria um callback para cada Estado, como não está definido, todos começam com void */
-typedef Estado (*MenuCallback)(void);
-
-/* Struct de Item de Menu, cada item do menu, ou seja, cada texto irá realizar uma ação, esse struct faz essa associação */
-typedef struct {
-    const char* texto;
-    MenuCallback acao;
-} ItemMenu;
 
 extern Estado estado_atual;
 

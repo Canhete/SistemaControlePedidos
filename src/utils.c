@@ -19,51 +19,26 @@ const char* obterDataAtual(){
     return dataAtual;
 }
 
-int validarIdPedidoObtido(int id, char *mensagem){
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r");
-    if(!arq){
-        perror("ERRO AO ABRIR O ARQUIVO!");
-        mensagem = "Erro ao abrir arquivo!";
-        return -1;
+// ===========================================================
+//              Funções de validação Pedido
+// ===========================================================
+
+int validarIdPedido(int id, char *mensagem){
+    int index = analisarPedido(id, mensagem);
+
+    if(index == -1) return 0; // Erro ao abrir arquivo
+
+    if(index == 1){
+        sprintf(mensagem, "ID do pedido já existe! Digite um ID válido!");
     }
 
-    char linha[BUFFER_ARQUIVO_LINHA];
-
-    while(fgets(linha, sizeof(linha), arq) != NULL){
-        struct Pedido P;
-        fscanf(arq, "%d", &P.id);
-        if(P.id == id) return 1;
-    }
-
-    fclose(arq);
-    mensagem = "ID do pedido não encontrado, digite um ID válido!";
-    return 0;
+    return 1; // Se passar o teste, tá livre para cadastro
 }
 
-int validarIdItemPedidoObtido(int id, char *mensagem){
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
+int validarIdCliente(int codigoVerificado, char *mensagem){
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_CLIENTE, "r");
     if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
-        return -1;
-    }
-
-    char linha[BUFFER_ARQUIVO_LINHA];
-
-    while(fgets(linha, sizeof(linha), arq) != NULL){
-        struct ItemPedido IP;
-        fscanf(arq, "%d", &IP.pedidoId);
-        if(IP.pedidoId == id) return 1;
-    }
-
-    fclose(arq);
-    mensagem = "ID do pedido não encontrado, digite um ID válido!";
-    return 0;
-}
-
-int validarIdClienteObtido(int codigoVerificado, char *mensagem){
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
-    if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
+        sprintf(mensagem, "Erro ao abrir arquivo de clientes!");
         return -1;
     }
 
@@ -71,120 +46,194 @@ int validarIdClienteObtido(int codigoVerificado, char *mensagem){
     
     while(fgets(linha, sizeof(linha), arq)){
         struct Cliente C;
-        fscanf(arq, "%d", &C.codigo);
-        if(C.codigo == codigoVerificado) return 1;
+
+        if(sscanf(linha, "%d,%c,%100[^,],%15[^\n]", &C.codigo, &C.tipo, C.nome, C.documento) == 4){
+            if(codigoVerificado == C.codigo){
+                fclose(arq);
+                return 1;
+            }
+        } // Sucesso, encontrou cliente com ID!
     }
 
     fclose(arq);
-    mensagem = "ID do cliente não encontrado, digite um ID válido!";
+    mensagem = "Código de cliente não existe! Digite um código válido!";
+    return 0; // Verificou toda lista de cliente, cliente não encontrado.
+}
+
+int validarIdProduto(int id, char *mensagem){
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
+    if(!arq){
+        sprintf(mensagem, "Erro ao abrir arquivo de produtos!");
+        return -1;
+    }
+
+    char linha[BUFFER_ARQUIVO_LINHA];
+    
+    while(fgets(linha, sizeof(linha), arq)){
+        Produto P;
+
+        if(sscanf(linha, "%d,%100[^,],%lf,%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
+            if(id == P.id){
+                fclose(arq);
+                return 1;
+            }
+        }
+    }
+
+    fclose(arq);
+    sprintf(mensagem, "Produto com id não encontrado! Digite um id válido!");
     return 0;
 }
 
-int validarTotalObtido(double total, char *mensagem){
+int validarData(const char *dataVerificada, char *mensagem){
+    if(dataVerificada == NULL){
+        sprintf(mensagem, "Data nula! Use o formato (dd/mm/aaaa).");
+        return 0;
+    }
+    
+    if((int) strlen(dataVerificada) != 10){
+        sprintf(mensagem, "Data inválida! Use o formato (dd/mm/aaaa).");
+        return 0;
+    }
+
+    int dia = 0;
+    int mes = 0;
+    int ano = 0;
+
+    if(sscanf(dataVerificada, "%2d/%2d/%4d", &dia, &mes, &ano) != 3){
+        sprintf(mensagem, "Formato inválido! Use o formato (dd/mm/aaaa).");
+        return 0;
+    }
+
+    // Verifica se ano e meses estão no limite aceitável
+    if(ano < 1 || ano > 9999){
+        sprintf(mensagem, "Ano inválido! Insira um ano válido!");
+        return 0;
+    }
+
+    if(mes < 1 || mes > 12){
+        sprintf(mensagem, "Mês inválido! Insira um mês válido!");
+        return 0;
+    }
+
+    int bissexto = ((ano % 4 == 0 && ano % 100 != 0) || (ano % 400 == 0));
+
+    int diasPorMes;
+    switch(mes){
+        case 1: 
+        case 3: 
+        case 5: 
+        case 7: 
+        case 8: 
+        case 10: 
+        case 12:
+            diasPorMes = 31; // Janeiro, Março, Maio, Julho, Setembro, Novembro, Dezembro
+            break;
+
+        case 4: 
+        case 6: 
+        case 9: 
+        case 11:
+            diasPorMes = 30; // Abril, Junho, Setembro, Novembro
+            break;
+
+        case 2: // Fevereiro, se for bissexto assume 29, se não 28;
+            diasPorMes = bissexto ? 29 : 28;
+            break;
+
+        default:
+            diasPorMes = 31; // Apenas para o caso de der errado
+    }
+
+    if(dia < 1 || dia > diasPorMes){
+        sprintf(mensagem, "Dia inválido para o mês obtido! Insira um dia válido!");
+        return 0;
+    }
+
+    return 1; // -> SUCESSO PASSOU VALIDAÇÃO
+}
+
+int validarTotal(double total, char *mensagem){
     if(total < 0){
-        mensagem = "Valor de total menor que zero!";
+        sprintf(mensagem, "Valor de total menor que zero!");
         return -2;
     }
 
     if(total == 0){
-        mensagem = "Valor de total não pode ser zero!";
+        sprintf(mensagem, "Valor de total não pode ser zero!");
         return -3;
     }
 
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r");
-    if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
-        return -1;
-    }
-
-    char linha[BUFFER_ARQUIVO_LINHA];
-    
-    while(fgets(linha, sizeof(linha), arq)){
-        struct Pedido P;
-        fscanf(arq, "%lf", &P.total);
-        if(P.total == total) return 1;
-    }
-
-    fclose(arq);
-    mensagem = "Nenhum pedido com esse total encontrado!";
-    return 0;
+    return 1;
 }
 
-int validarSubtotalObtido(double subtotal, char *mensagem){
-    if(subtotal < 0){
-        mensagem = "Valor de subtotal menor que zero!";
+// ===========================================================
+//              Funções de validação Item Pedido
+// ===========================================================
+
+int validarIdItemPedido(int id, char *mensagem){
+    int index = analisarItemPedido(id, mensagem);
+
+    if(index == -1) return 0;
+
+    if(index == 0){
+        sprintf(mensagem, "Cliente com id não enontrado! Digite um ID válido!");
+    }
+
+    return 1;
+}
+
+int validarSubTotal(double total, char *mensagem){
+    if(total < 0){
+        sprintf(mensagem, "Valor de total menor que zero!");
         return -2;
     }
 
-    if(subtotal == 0){
-        mensagem = "Valor de subtotal não pode ser zero!";
+    if(total == 0){
+        sprintf(mensagem, "Valor de total não pode ser zero!");
         return -3;
     }
 
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
-    if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
-        return -1;
-    }
-
-    char linha[BUFFER_ARQUIVO_LINHA];
-    
-    while(fgets(linha, sizeof(linha), arq)){
-        struct ItemPedido IP;
-        fscanf(arq, "%lf", &IP.subtotal);
-        if(IP.subtotal == subtotal) return 1;
-    }
-
-    fclose(arq);
-    mensagem = "Nenhum item de pedido com esse subtotal encontrado!";
-    return 0;
+    return 1;
 }
 
-int validarData(char *dataVerificada, char *mensagem){
-    int data = atoi(dataVerificada + 6) * 10000 + atoi(dataVerificada + 3) * 100 + atoi(dataVerificada);
-
-    int dia = data / 1000000;
-    int mes = (data / 10000) % 100;
-    int ano = data % 10000;
-
-    if ((dia >= 1 && dia <= 31) && (mes >= 1 && mes <= 12) && (ano > 0 && ano <= 9999)){ // Verifica se os numeros sao validos
-        if ((dia == 29 && mes == 2) && ((ano % 4) == 0)) return 1;  // Ano bissexto
-        else if (dia <= 28 && mes == 2) return 1;    // Fevereiro
-        else if ((dia <= 30) && (mes == 4 || mes == 6 || mes == 9 || mes == 11)) return 1; // Mês de 30 dias
-        else if ((dia <=31) && (mes == 1 || mes == 3 || mes == 5 || mes == 7 || mes ==8 || mes == 10 || mes == 12)) return 1; // Mês de 31 dias
-        else return 0;
-    } else {
-        mensagem = "Número de dia/mês/ano inválido! Use a forma (ddmmaaaa).";
-        return 0;
-    }
-}
-
-int validarQuantidadeObtida(int quantidade, char *mensagem){
+int validarQuantidade(int quantidade, char *mensagem){
     if(quantidade < 0){
-        mensagem = "Valor de quantidade menor que zero!";
+        sprintf(mensagem, "Valor de quantidade menor que zero!");
         return -2;
     }
 
     if(quantidade == 0){
-        mensagem = "Valor de quantidade não pode ser zero!";
+        sprintf(mensagem, "Valor de quantidade não pode ser zero!");
         return -3;
     }
 
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
+    // Verificar se a quantidade não extrapola o estoque
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
     if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
+        sprintf(mensagem, "Erro ao abrir arquivo de produtos!");
         return -1;
     }
 
     char linha[BUFFER_ARQUIVO_LINHA];
     
     while(fgets(linha, sizeof(linha), arq)){
-        struct ItemPedido IP;
-        fscanf(arq, "%d", &IP.quantidade);
-        if(IP.quantidade == quantidade) return 1;
+        Produto P;
+
+        if(sscanf(linha, "%d,%100[^,]s,%lf,%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
+            if(quantidade > P.estoque){
+                sprintf(mensagem, "Quantidade superior ao estoque disponível! Digite uma quantidade válida!");
+                fclose(arq);
+                return 0;
+            }
+        }
     }
 
     fclose(arq);
-    mensagem = "Nenhum item de pedido com essa quantidade encontrado!";
-    return 0;
+    return 1;
+}
+
+// Formata data antes de gravar no csv para garantir compatibilidade
+void formatarDataPadrao(int dia, int mes, int ano, char *out){
+    snprintf(out, 11, "%02d/%02d/%04d", dia, mes, ano);
 }

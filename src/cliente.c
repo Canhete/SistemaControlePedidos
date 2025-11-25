@@ -96,8 +96,10 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd) {
     (*qtd)++;
 
     mvprintw(11, 2, "Cliente cadastrado com sucesso!");
+    mvprintw(13, 2, "Pressione qualquer tecla para voltar...");
     getch();
     noecho(); // desabilita eco...
+    estado_atual = ST_MENU_PRINCIPAL;
 }
 
 // ---------------- LISTAR CLIENTES ----------------
@@ -121,6 +123,7 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
     mvprintw(y + 1, 2, "Pressione qualquer tecla para voltar...");
     getch();
+    estado_atual = ST_MENU_PRINCIPAL;
 }
 
 // ---------------- MENU PRINCIPAL ----------------
@@ -146,10 +149,12 @@ void menuClientes() {
         refresh();
 
         int ch = getch();
-        if(ch == KEY_UP) {
-            escolha = (escolha > 0) ? escolha - 1 : n_opcoes - 1;
-        } else if(ch == KEY_DOWN) {
-            escolha = (escolha < n_opcoes - 1) ? escolha + 1 : 0;
+        
+        if(ch == KEY_UP && escolha > 0) {
+            escolha--;
+        }
+        else if(ch == KEY_DOWN && escolha < n_opcoes - 1) {
+            escolha++;
         } else if(ch == '\n' || ch == 10) {
             switch (escolha) {
                 case 0:
@@ -165,22 +170,6 @@ void menuClientes() {
                     break;
                 }
                 break;
-            case '\n': // Mudei isso aqui para permitir maior integração, infelizmente switchs aninhados quebram o código - Raphael
-                if(escolha == 0){
-                    // Mudar para função de cadastro, ideia é você abrir o arquivo para salvar já o cliente
-                    // Coloque a função de cadastro no estados.c para chamar o menu de cadastro, aqui apenas
-                    // chama o estado, a ação que do estado está no estados.c - Raphael
-                    estado_atual = ST_CLIENTE_CADASTRO;
-                    break;
-                } else if(escolha == 1){
-                    // Listar clientes, a mesma coisa, abrir o arquivo para ler os clientes cadastrados - Raphael
-                    estado_atual = ST_CLIENTE_LISTA;
-                    break;
-                } else {
-                    // Sair do menu, volta pro menu principal
-                    estado_atual = ST_MENU_PRINCIPAL;
-                    break;
-                }
         }
     }
 }

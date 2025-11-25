@@ -39,6 +39,7 @@
 #define BUFFER_LINHA_CARACTERES 512   // Tamanho máximo do buffer para quando o usuário for digitar algo na tela
 #define BUFFER_LINHA_LOGO 100         // Tamanho do buffer da logo
 #define QUANT_LINHAS_LOGO 10          // Quantidade de linhas da logo
+#define DELAY_ANIMACAO 100            // Delay em ms para a animação de abertura
 
 // Janela global para uso em todos estados
 extern WINDOW *win;
