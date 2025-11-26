@@ -71,15 +71,15 @@ static void desenhaBotoesHorizontal(WINDOW *win, char *labels[], int total, int 
 }
 
 static int criaPopupMensagem(WINDOW *win, char *titulo, char *mensagem){
-    noecho();
-    curs_set(0);
-    keypad(win, true);
-
     int altura, largura;
     getmaxyx(stdscr, altura, largura);
 
     WINDOW *popup = newwin(9, largura/2, (altura - 9)/2, (largura - (largura/2))/2);
     box(popup, 0, 0);
+
+    keypad(popup, true);
+    noecho();
+    curs_set(0);
 
     char *labels[] = {
         "Não",
@@ -98,7 +98,7 @@ static int criaPopupMensagem(WINDOW *win, char *titulo, char *mensagem){
         wrefresh(popup);
 
         int ch;
-        ch = wgetch(win);
+        ch = wgetch(popup);
 
         if(ch == KEY_LEFT) selecionado = 0;
         else if(ch == KEY_RIGHT) selecionado = 1;
@@ -107,12 +107,20 @@ static int criaPopupMensagem(WINDOW *win, char *titulo, char *mensagem){
     werase(popup);
     wrefresh(popup);
     delwin(popup);
+
+    keypad(win, false);
+    echo();
+    curs_set(1);
+
     return selecionado;
 }
 
 // ==========================================================================================
 //          FUNÇÕES DE CASO DE USO DOS PEDIDOS
 // ==========================================================================================
+
+struct Pedido;
+struct ItemPedido;
 
 struct Pedido pedidoGlobal;
 struct ItemPedido itemPedidoGlobal;
@@ -127,7 +135,6 @@ void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
 
     const char *dataAtual = obterDataAtual();
     char mensagem[BUFFER_LINHA_CARACTERES];
-    double totalCalculado = 0;
     
     mvwprintw(win, 0, 4, "[ Cadastrar Pedido ]");
 
@@ -153,6 +160,7 @@ void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
         mvwprintw(win, 5, 2, "%100s", "");
     } while(!validarIdPedido(P->id, mensagem));
 
+    box(win, 0, 0);
     mvwprintw(win, 5, 2, "Código do cliente: ");
     wrefresh(win);
 
@@ -166,8 +174,9 @@ void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
             wrefresh(win);
         }
         mvwprintw(win, 7, 2, "%100s", "");
-    } while(!validarIdPedido(P->clienteId, mensagem));
+    } while(!validarIdCliente(P->clienteId, mensagem));
 
+    box(win, 0, 0);
     mvwprintw(win, 7, 2, "Data do pedido (dd/mm/aaaa) [%s]: ", dataAtual);
     wrefresh(win);
 
@@ -185,13 +194,16 @@ void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
     }
 
     // Cadastro de Item de pedido; Pelo menos 1 item de pedido deve estar cadastrado
-    cadastrarItemPedido(win, P, IP);
+    cadastrarItemPedido(win, P, IP, 1);
+    box(win, 0, 0);
     wrefresh(win);
 
     // TOTAL (SOMA DO SUBTOTAIS DE TODOS OS ITENS)
     // Calculo prévio do total
-    if(calcularTotal(P, mensagem)){
-        totalCalculado += calcularTotal(P, mensagem);
+    double totalCalculado = calcularTotal(P, mensagem);
+
+    if(totalCalculado >= 0){
+        P->total = totalCalculado;
         mvwprintw(win, 11, 2, "Total: %.2lf", totalCalculado);
     } else {
         mvwprintw(win, 11, 2, "%s", mensagem);
@@ -204,6 +216,7 @@ void cadastrarPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
     }
 
     mvwprintw(win, 13, 2, "Pressione qualquer tecla...");
+    box(win, 0, 0);
     wrefresh(win);
 
     wgetch(win);
@@ -433,7 +446,7 @@ void listarItemPedidosDoPedido(WINDOW *win, int idPedido){
     
     // Obtenção das informações detalhadas
     FILE *arqPed = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r");
-    if(!arq){
+    if(!arqPed){
         mvwprintw(win, 5, 2, "Erro ao abrir arquivo de pedidos!");
         return;
     }
@@ -446,7 +459,7 @@ void listarItemPedidosDoPedido(WINDOW *win, int idPedido){
     while(fgets(linha, sizeof(linha), arqPed)){
         struct Pedido P;
         
-        if(sscanf(linha, "%d,%d,%11[^,],%lf", &P.id, &P.clienteId, P.data, &P.total) == 4 && P.id == idPedido){
+        if(sscanf(linha, "%d,%d,%10[^,],%lf", &P.id, &P.clienteId, P.data, &P.total) == 4 && P.id == idPedido){
             sprintf(linhaId, "Pedido ID: %d", P.id);
             sprintf(linhaCliente, "Cliente ID: %d", P.clienteId);
             sprintf(linhaData, "Data: %s", P.data);
@@ -551,7 +564,7 @@ void removerPedido(WINDOW *win){
     int idRemover;
 
     do{
-        idRemover = input_int(win, 3, 47);
+        idRemover = input_int(win, 3, 40);
         if(!validarIdPedido(idRemover, mensagem)){
             mvwprintw(win, 5, 2, "%s", mensagem);
             wrefresh(win);
@@ -570,7 +583,6 @@ void removerPedido(WINDOW *win){
     mvwprintw(win, 8, 2, "Pressione qualquer tecla...");
     wrefresh(win);
     wgetch(win);
-    delwin(win);
 }
 
 void removerTodosPedidos(WINDOW *win){
@@ -593,7 +605,6 @@ void removerTodosPedidos(WINDOW *win){
     mvwprintw(win, 4, 2, "Pressione qualquer tecla...");
     wrefresh(win);
     wgetch(win);
-    delwin(win);
 }
 
 void consultarPedido(WINDOW *win){
@@ -627,30 +638,52 @@ void consultarPedido(WINDOW *win){
 //         FUNÇÕES DE CASO DE USO DOS ITENS DE PEDIDOS
 // ========================================================================================
 
-void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
-    //double totalCalculado = 0;
-    double subtotalCalculado = 0;
-
-    int altura, largura;
+void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP, int primeiraVez){
     char mensagem[BUFFER_LINHA_CARACTERES];
-    int continuar = 0;
     int count = 1;
 
     while(1){
-        getmaxyx(stdscr, altura, largura);
-
         keypad(win, true);
         echo();
         curs_set(1);
         werase(win);
         box(win, 0, 0);
         
-        mvwprintw(win, 0, 4, "[ Cadastrar Item de Pedido ]");
+        mvwprintw(win, 0, 2, "[ Cadastrar Item de Pedido ]");
+
+        if(!criarArquivoItemPedido(mensagem)){
+            mvwprintw(win, 2, 2, "%s", mensagem);
+            estado_atual = ST_MENU_PRINCIPAL;
+            return;
+        }
+
+        if(!primeiraVez){
+            mvwprintw(win, 3, 2, "ID do pedido: ");
+            wrefresh(win);
+            do{
+                P->id = input_int(win, 3, 17);
+                if(!validarIdPedido(P->id, mensagem)){
+                    mvwprintw(win, 5, 2, "%100s", "");
+                    mvwprintw(win, 5, 2, "%s", mensagem);
+                    wrefresh(win);
+                }
+            } while(!validarIdProduto(P->id, mensagem));
+        }
+
+        werase(win);
+        box(win, 0, 0);
+
+        if (!primeiraVez) {
+            mvwprintw(win, 2, 2, "Cadastro de mais um item para o pedido ID %d", P->id);
+        } else {
+            mvwprintw(win, 2, 2, "Cadastro do primeiro item para o pedido ID %d", P->id);
+        }
+
         mvwprintw(win, 3, 2, "ITEM DE PEDIDO %d", count);
 
         // Definindo ID do Item de pedido = ID do pedido
         IP->pedidoId = P->id;
-    
+
         mvwprintw(win, 5, 2, "ID do produto: ");
         wrefresh(win);
 
@@ -680,25 +713,15 @@ void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
             mvwprintw(win, 7, 14, "%100s", "");
         } while(!validarQuantidade(IP->quantidade, mensagem));
 
+        double subtotalCalculado = calcularSubtotal(IP, mensagem);
         // Cálculo prévio do subtotal
-        if(calcularSubtotal(IP, mensagem) > 0){
-            subtotalCalculado += calcularSubtotal(IP, mensagem);
+        if(subtotalCalculado > 0){
+            IP->subtotal = subtotalCalculado;
             mvwprintw(win, 9, 2, "Subtotal: %.2lf", subtotalCalculado);
         } else {
             mvwprintw(win, 9, 2, "%s", mensagem);
         }
         wrefresh(win);
-
-        // Calculo prévio do total
-        /*
-        if(calcularTotal(P->id, IP->pedidoId, mensagem) > 0){
-            totalCalculado += calcularTotal(P->id, IP->pedidoId, mensagem);
-            mvwprintw(win, 11, 2, "Total: %.2lf", totalCalculado);
-        } else {
-            mvwprintw(win, 11, 2, "%s", mensagem);
-        }
-        wrefresh(win);
-        */
 
         if(guardarItemPedido(IP, mensagem)){
             mvwprintw(win, 11, 2, "Item salvo com sucesso!");
@@ -706,31 +729,23 @@ void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP){
             mvwprintw(win, 11, 2, "%s", mensagem);
         }
 
-        char *opcaoBooleana[] = {
-            "Não",
-            "Sim"
-        };
-        const int totalOpcoes = 2;
+        wrefresh(win);
 
         // Janela perguntando se quer cadastrar mais itens
-        WINDOW *prompt = newwin(10, altura/2, 50, largura/2);
-        box(prompt, 0, 0);
-
-        mvwprintw(prompt, 5, 2, "Deseja adicionar mais um item de pedido?");
-        desenhaBotoesHorizontal(prompt, opcaoBooleana, totalOpcoes, continuar);
-
-        if(!continuar){
-            delwin(prompt);
+        if(criaPopupMensagem(win, "Deseja cadastrar outro item para este pedido?", "") == 0){
             break;
         } else {
-            delwin(prompt);
             count++;
         }
     }
-    mvwprintw(win, 19, 2, "Pressione qualquer tecla para voltar...");
+
+    box(win, 0, 0);
     wrefresh(win);
-    wgetch(win);
-    estado_atual = ST_PEDIDO_PRINCIPAL;
+
+    if(primeiraVez){
+        werase(win);
+        estado_atual = ST_PEDIDO_PRINCIPAL;
+    }
 }
 
 void listarTodosItensPedidos(WINDOW *win){
@@ -897,7 +912,7 @@ void removerItemPedido(WINDOW *win){
     // Confirmação de remoção
     if(!criaPopupMensagem(win, "Tem certeza que deseja apagar este item de pedido?", "Esta ação não pode ser desfeita!")) return;
 
-    if(apagarPedido(idRemover, mensagem)){
+    if(apagarItemPedido(idRemover, mensagem)){
         mvwprintw(win, 7, 2, "Pedido removido com sucesso!");
     } else {
         mvwprintw(win, 7, 2, "%s", mensagem);
@@ -906,7 +921,6 @@ void removerItemPedido(WINDOW *win){
     mvwprintw(win, 8, 2, "Pressione qualquer tecla...");
     wrefresh(win);
     wgetch(win);
-    delwin(win);
 }
 
 void removerTodosItensPedido(WINDOW *win){
@@ -943,63 +957,47 @@ void removerTodosItensPedido(WINDOW *win){
     mvwprintw(win, 4, 2, "Pressione qualquer tecla...");
     wrefresh(win);
     wgetch(win);
-    delwin(win);
 }
 
-int calcularTotal(struct Pedido *P, char *mensagem){
-    FILE *arqPed = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r");
-    if(!arqPed){
-        sprintf(mensagem, "Erro ao abrir arquivo de pedidos!");
-        return -1;
-    }
-    FILE *arqPrd = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
-    if(!arqPrd){
-        sprintf(mensagem, "Erro ao abrir arquivo de produtos!");
-        return -2;
+double calcularTotal(struct Pedido *P, char *mensagem){
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
+    if(!arq){
+        sprintf(mensagem, "Erro ao abrir arquivo de itens de pedidos!");
+        return -1.0;
     }
 
-    double total = 0;
+    double total = 0.0;
     char linha[BUFFER_ARQUIVO_LINHA];
 
-    while(fgets(linha, sizeof(linha), arqPed)){
-        struct ItemPedido IP_temp;
+    while(fgets(linha, sizeof(linha), arq)){
+        struct ItemPedido IP;
 
-        if(sscanf(linha, "%d,%d,%d,%lf", &IP_temp.pedidoId, &IP_temp.produtoId, &IP_temp.quantidade, &IP_temp.subtotal) == 4){
-            if(IP_temp.pedidoId == P->id){
-                total += IP_temp.subtotal;
+        if(sscanf(linha, "%d,%d,%d,%lf", &IP.pedidoId, &IP.produtoId, &IP.quantidade, &IP.subtotal) == 4){
+            if(IP.pedidoId == P->id){
+                total += IP.subtotal;
             }
         }
     }
 
-    P->total = total;
-    guardarPedido(P, mensagem);
-
-    fclose(arqPrd);
-    fclose(arqPed);
+    fclose(arq);
 
     return total;
 }
 
-int calcularSubtotal(struct ItemPedido *IP, char *mensagem){
+double calcularSubtotal(struct ItemPedido *IP, char *mensagem){
     FILE *arqPrd = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
     if(!arqPrd){
         sprintf(mensagem, "Erro ao abrir arquivo de produtos!");
-        return -1;
+        return -1.0;
     }
 
-    FILE *arqIP = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
-    if(!arqIP){
-        sprintf(mensagem, "Erro ao abrir arquivo de pedidos!");
-        return -2;
-    }
-
-    double subtotal = 0;
+    double subtotal = -1.0;
     char linha[BUFFER_ARQUIVO_LINHA];
 
     while(fgets(linha, sizeof(linha), arqPrd)){
         Produto Pd;
 
-        if(sscanf(linha, "%d,%100[^,],%lf,%d", &Pd.id, Pd.descricao, &Pd.preco, &Pd.estoque) == 4){
+        if(sscanf(linha, "%d,%99[^,],%lf,%d", &Pd.id, Pd.descricao, &Pd.preco, &Pd.estoque) == 4){
             if(IP->produtoId == Pd.id){
                 subtotal = Pd.preco * IP->quantidade;
                 break;
@@ -1010,9 +1008,8 @@ int calcularSubtotal(struct ItemPedido *IP, char *mensagem){
     IP->subtotal = subtotal;
 
     fclose(arqPrd);
-    fclose(arqIP);
 
-    guardarItemPedido(IP, mensagem);
+    if(subtotal < 0.0) sprintf(mensagem, "Produto não encontrado para cálculo do subtotal.");
 
     return subtotal;
 }
@@ -1043,7 +1040,7 @@ static void desenhaOpcoesVertical(WINDOW *win, char *labels[], int total, int se
     int y = inicio_y;
 
     // Como a janela aparace na frente é necessário limpar seu interior
-    for(int i=1; i<largura; i++) mvwhline(win, i, 1, ' ', altura-2);
+    for(int i=1; i<altura - 1; ++i) mvwhline(win, i, 1, ' ', largura-2);
 
     for(int i=0; i<total; i++){
         char labelEscolhido[BUFFER_LINHA_CARACTERES];
@@ -1076,7 +1073,7 @@ static void tutorialLateral(WINDOW *win){
 
     // Limpa a janela, evitando glitches visuais
     werase(win);
-    for(int i=1; i<largura; i++) mvwhline(win, i, 1, ' ', altura-2);
+    for(int i=1; i<altura - 1; ++i) mvwhline(win, i, 1, ' ', largura-2);
     box(win, 0, 0);
     wrefresh(win);
 
@@ -1145,7 +1142,7 @@ void menuPedidos(){
         int direita_x = largura_esquerda + 1;
 
         // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
-        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
+        if(ehTerminalPequeno(altura, largura)) continue;
 
         // Cria as janelas
         WINDOW *janelaEsquerda = newwin(altura_janela, largura_esquerda, topo, esquerda_x);
@@ -1279,7 +1276,7 @@ void menuPedidos(){
                 box(janelaDireita, 0, 0);
                 wrefresh(janelaDireita);
 
-                cadastrarItemPedido(janelaDireita, &pedidoGlobal, &itemPedidoGlobal);
+                cadastrarItemPedido(janelaDireita, &pedidoGlobal, &itemPedidoGlobal, 0);
             }
         }
 

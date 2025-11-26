@@ -41,6 +41,10 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd);
 
 void listarClientes(struct Cliente clientes[], int qtd);
 
+void salvarClientesCSV(struct Cliente clientes[], int qtd);
+
+void carregarClientesCSV(struct Cliente clientes[], int *qtd);
+
 void menuClientes();
 
 #endif

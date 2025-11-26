@@ -15,6 +15,9 @@ int criarArquivoPedido(char *mensagem){
         return -1;
     }
 
+    // Primeira linha cabeçalho
+    fprintf(arq, "id,clienteId,data,total\n");
+
     fclose(arq);
     return 1; // -> sucesso
 }
@@ -97,13 +100,13 @@ int apagarPedido(int idParaRemover, char *mensagem){
 int apagarTodosPedidosDoCliente(int idDoCliente, char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r+");
     if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
+        sprintf(mensagem, "Erro ao abrir arquivo!");
         return -1;
     }
 
     FILE *arqtemp = fopen(DIRETORIO_ARQUIVO_TEMP, "w+");
     if(!arq){
-        mensagem = "Erro ao criar arquivo temporário!";
+        sprintf(mensagem, "Erro ao criar arquivo temporário!");
         fclose(arq);
         return -2;
     }
@@ -159,6 +162,20 @@ int apagarTodosPedidosExistentes(char *mensagem){
 // =====================================================================
 //                  FUNÇÕES ITEM DE PEDIDO
 // ====================================================================
+
+int criarArquivoItemPedido(char *mensagem){
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "a");
+    if(!arq){
+        sprintf(mensagem, "Erro ao criar o arquivo de item de pedidos!");
+        return -1;
+    }
+
+    // Primeira linha cabeçalho
+    fprintf(arq, "pedidoId,produtoId,quantidade,subtotal\n");
+
+    fclose(arq);
+    return 1; // -> sucesso
+}
 
 int guardarItemPedido(struct ItemPedido *IP, char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "a");
@@ -232,13 +249,13 @@ int apagarItemPedido(int idParaRemover, char *mensagem){
 int apagarTodosItensDoPedido(int idDoPedido, char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
     if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
+        sprintf(mensagem, "Erro ao abrir arquivo!");
         return -1;
     }
 
     FILE *arqtemp = fopen(DIRETORIO_ARQUIVO_TEMP, "w");
     if(!arq){
-        mensagem = "Erro ao criar arquivo temporário!";
+        sprintf(mensagem, "Erro ao criar arquivo temporário!");
         fclose(arq);
         return -2;
     }
@@ -263,13 +280,13 @@ int apagarTodosItensDoPedido(int idDoPedido, char *mensagem){
 int apagarTodosItensPedidoExistentes(char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r");
     if(!arq){
-        mensagem = "Erro ao abrir arquivo!";
+        sprintf(mensagem, "Erro ao abrir arquivo!");
         return -1;
     }
 
     FILE *arqtemp = fopen(DIRETORIO_ARQUIVO_TEMP, "w");
     if(!arq){
-        mensagem = "Erro ao criar arquivo temporário!";
+        sprintf(mensagem, "Erro ao criar arquivo temporário!");
         fclose(arq);
         return -2;
     }
