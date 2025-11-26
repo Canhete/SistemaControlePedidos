@@ -12,11 +12,6 @@
 #include "produto.h" // Importa funções relacionadas a produtos
 #include "estados.h" // Importa estados do sistema
 
-/* DEFINIÇÕES */
-
-#define MAX_PEDIDOS 100
-#define MAX_ITENS_PEDIDO 500
-
 /* Estrutura de dados do Pedido */
 
 struct Pedido {
@@ -50,7 +45,7 @@ void consultarPedido(WINDOW *win);
 
 /* ITEM DE PEDIDOS */
 
-void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP);
+void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP, int primeiraVez);
 
 int analisarItemPedido(int idDoItemPedido, char *mensagem);
 
@@ -62,9 +57,9 @@ void listarTodosItensPedidos(WINDOW *win);
 
 /* Cálculos */
 
-int calcularTotal(struct Pedido *P, char *mensagem);
+double calcularTotal(struct Pedido *P, char *mensagem);
 
-int calcularSubtotal(struct ItemPedido *IP, char *mensagem);
+double calcularSubtotal(struct ItemPedido *IP, char *mensagem);
 
 /* Interface */
 

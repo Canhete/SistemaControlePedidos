@@ -41,16 +41,13 @@
 #define QUANT_LINHAS_LOGO 10          // Quantidade de linhas da logo
 #define DELAY_ANIMACAO 100            // Delay em ms para a animação de abertura
 
-// Janela global para uso em todos estados
-extern WINDOW *win;
-
 /* FUNÇÕES DAS INTERFACE (cada uma é uma tela e/ou elemento gráfico) */
 
 void inicializaInterface();
 
 void finalizaInterface();
 
-int ehTerminalPequeno(WINDOW *win, int altura_janela, int largura_janela);
+int ehTerminalPequeno(int altura_janela, int largura_janela);
 
 int input_int(WINDOW *win, int y, int x);
 
@@ -62,6 +59,6 @@ void input_string(WINDOW *win, int y, int x, char *output, int maxlen);
 
 void animacaoAbertura();
 
-void menuPrincipal(WINDOW *win);
+void menuPrincipal();
 
 #endif

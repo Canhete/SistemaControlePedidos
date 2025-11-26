@@ -24,7 +24,7 @@ void finalizaInterface(){
     endwin();
 }
 
-int ehTerminalPequeno(WINDOW *win, int altura_janela, int largura_janela){
+int ehTerminalPequeno(int altura_janela, int largura_janela){
     // Obtenção do tamanho da tela e das cooredenadas de inicio
     int altura, largura;
     getmaxyx(stdscr, altura, largura);
@@ -201,8 +201,10 @@ static int animaLogo(WINDOW *win, char **logo, int linhas, int delay_secs){
     };
     */
 
+    /*
     const int totalBotoes = 4;
     int selecionado = 0;
+    */
 
     // Linha de maior tamanho da logo, para definir o tamanho minimo que a logo deve ter para aparecer
     int tamanhoMax = 0;
@@ -272,7 +274,7 @@ void animacaoAbertura(){
         int posY_janela = UI_PADDING;
 
         // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
-        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
+        if(ehTerminalPequeno(altura, largura)) continue;
 
         WINDOW *janelaPrincipal = newwin(altura_janela, largura_janela, posX_janela, posY_janela);
         keypad(stdscr, true);
@@ -306,7 +308,10 @@ void animacaoAbertura(){
 //                      MENU PRINCIPAL
 //  =========================================================
 
-void menuPrincipal(WINDOW *win){
+void menuPrincipal(){
+    noecho();
+    curs_set(0);
+
     int linhasLogo = 0;
     char **logo = carregaLogo("public/logo.txt", &linhasLogo);
 
@@ -340,7 +345,7 @@ void menuPrincipal(WINDOW *win){
         int posY_janela = UI_PADDING;
 
         // Impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
-        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
+        if(ehTerminalPequeno(altura, largura)) continue;
 
         WINDOW *janelaPrincipal = newwin(altura_janela, largura_janela, posX_janela, posY_janela);
         box(janelaPrincipal, 0, 0);
@@ -354,7 +359,6 @@ void menuPrincipal(WINDOW *win){
 
         // A cada caracter obtido, a janela é atualizada
         wrefresh(janelaPrincipal);
-        win = janelaPrincipal;
 
         ch = getch();
 
@@ -389,8 +393,4 @@ void menuPrincipal(WINDOW *win){
     }
 
     if (logo) liberaLogo(logo, linhasLogo);
-}
-
-void menuConfiguracao(){
-    // Implementação futura
 }

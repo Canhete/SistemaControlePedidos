@@ -12,7 +12,6 @@ struct Cliente;         // Declaração externa do array de clientes
 int qtd_cliente;        // Declaração externa da quantidade de clientes
 
 Estado estado_atual;    // Declaração externa do estado atual
-WINDOW *win;            // Declaração externa da janela global
 
 void processaEstado(Estado st){
     switch(st){
@@ -23,7 +22,7 @@ void processaEstado(Estado st){
 
         case ST_MENU_PRINCIPAL:
             animacaoAbertura();
-            menuPrincipal(win);
+            menuPrincipal();
             break;
 
         // ================================================

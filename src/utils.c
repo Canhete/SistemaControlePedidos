@@ -47,7 +47,7 @@ int validarIdCliente(int codigoVerificado, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         struct Cliente C;
 
-        if(sscanf(linha, "%d,%c,%100[^,],%15[^\n]", &C.codigo, &C.tipo, C.nome, C.documento) == 4){
+        if(sscanf(linha, "%d,%c,%99[^,],%14[^\n]", &C.codigo, &C.tipo, C.nome, C.documento) == 4){
             if(codigoVerificado == C.codigo){
                 fclose(arq);
                 return 1;
@@ -72,7 +72,7 @@ int validarIdProduto(int id, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         Produto P;
 
-        if(sscanf(linha, "%d,%100[^,],%lf,%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
+        if(sscanf(linha, "%d,%99[^,],%lf,%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
             if(id == P.id){
                 fclose(arq);
                 return 1;
