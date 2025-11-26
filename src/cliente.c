@@ -2,7 +2,7 @@
 #include "../include/interface.h"
 #include "../include/estados.h"
 
-// Estrutura Cliente
+
 
 struct Cliente clientes[MAX_CLIENTES];
 int qtd_clientes = 0;
@@ -56,9 +56,120 @@ int validarCNPJ(char cnpj[]) {
     return (digito1 == (cnpj[12] - '0') && digito2 == (cnpj[13] - '0'));
 }
 
-// ---------------- CADASTRO ----------------
+// =====================================================
+// =============== FUNÇÃO REMOVER CLIENTE ==============
+// =====================================================
+void removerCliente(struct Cliente clientes[], int *qtd) {
+    echo();
+    curs_set(1);
+    clear();
+
+    // --- CORREÇÃO: sempre carregar clientes antes ---
+    carregarClientesCSV(clientes, qtd);
+
+    if (*qtd == 0) {
+        mvprintw(2, 2, "Nenhum cliente cadastrado!");
+        getch();
+        return;
+    }
+
+    int codigo;
+    mvprintw(2, 2, "--- Remover Cliente ---");
+    mvprintw(4, 2, "Digite o código do cliente: ");
+    scanw("%d", &codigo);
+
+    int index = -1;
+    for (int i = 0; i < *qtd; i++) {
+        if (clientes[i].codigo == codigo) {
+            index = i;
+            break;
+        }
+    }
+
+    if (index == -1) {
+        mvprintw(6, 2, "Cliente não encontrado!");
+        getch();
+        return;
+    }
+
+    for (int i = index; i < *qtd - 1; i++) {
+        clientes[i] = clientes[i + 1];
+    }
+
+    (*qtd)--;
+
+    // Ajustar IDs após remoção
+    for (int i = 0; i < *qtd; i++) {
+        clientes[i].codigo = i + 1;
+    }
+
+    salvarClientesCSV(clientes, *qtd);
+
+    mvprintw(8, 2, "Cliente removido com sucesso!");
+    mvprintw(10, 2, "Pressione qualquer tecla para voltar...");
+    getch();
+}
+
+
+// =====================================================
+// =============== SALVAR EM CSV =======================
+// =====================================================
+void salvarClientesCSV(struct Cliente clientes[], int qtd) {
+    FILE *fp = fopen("clientes.csv", "w");
+    if (!fp) return;
+
+    fprintf(fp, "codigo;tipo;nome;documento;telefone;endereco\n");
+
+    for (int i = 0; i < qtd; i++) {
+        fprintf(fp, "%d;%c;%s;%s;%s;%s\n",
+            clientes[i].codigo,
+            clientes[i].tipo,
+            clientes[i].nome,
+            clientes[i].documento,
+            clientes[i].telefone,
+            clientes[i].endereco
+        );
+    }
+
+    fclose(fp);
+}
+
+// =====================================================
+// =============== CARREGAR DADOS =======================
+// =====================================================
+void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
+    FILE *fp = fopen("clientes.csv", "r");
+    if (!fp) return;
+
+    char linha[512];
+    fgets(linha, sizeof(linha), fp); // ignora cabeçalho
+
+    *qtd = 0;
+
+    while (fgets(linha, sizeof(linha), fp) && *qtd < MAX_CLIENTES) {
+        struct Cliente c;
+        sscanf(linha, "%d;%c;%99[^;];%14[^;];%19[^;];%149[^\n]",
+            &c.codigo,
+            &c.tipo,
+            c.nome,
+            c.documento,
+            c.telefone,
+            c.endereco
+        );
+        clientes[*qtd] = c;
+        (*qtd)++;
+    }
+
+    fclose(fp);
+}
+
+// =====================================================
+// =============== CADASTRO CLIENTE ====================
+// =====================================================
 void cadastrarCliente(struct Cliente clientes[], int *qtd) {
-    echo(); // habilita digitação visível...
+    echo();
+    curs_set(1);
+
     struct Cliente novo;
     novo.codigo = *qtd + 1;
 
@@ -68,44 +179,69 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd) {
     scanw(" %c", &novo.tipo);
     novo.tipo = toupper(novo.tipo);
 
+    mvprintw(6, 2, (novo.tipo == 'F') ? "Nome: " : "Razão Social: ");
+    getnstr(novo.nome, 99);
+
+    // Documento ================================
     if (novo.tipo == 'F') {
-        mvprintw(6, 2, "Nome: ");
-        getnstr(novo.nome, 99);
         do {
             mvprintw(8, 2, "CPF (somente números): ");
             getnstr(novo.documento, 14);
             if (!validarCPF(novo.documento))
-                mvprintw(9, 2, "CPF inválido. Tente novamente.\n");
+                mvprintw(9, 2, "CPF inválido! Tente novamente.");
         } while (!validarCPF(novo.documento));
+
     } else if (novo.tipo == 'J') {
-        mvprintw(6, 2, "Razão Social: ");
-        getnstr(novo.nome, 99);
         do {
             mvprintw(8, 2, "CNPJ (somente números): ");
             getnstr(novo.documento, 14);
             if (!validarCNPJ(novo.documento))
-                mvprintw(9, 2, "CNPJ inválido. Tente novamente.\n");
+                mvprintw(9, 2, "CNPJ inválido! Tente novamente.");
         } while (!validarCNPJ(novo.documento));
+
     } else {
         mvprintw(10, 2, "Tipo inválido!");
         getch();
         return;
     }
 
+    // TELEFONE ================================
+    do {
+        mvprintw(11, 2, "Telefone: ");
+        getnstr(novo.telefone, 19);
+        if (strlen(novo.telefone) < 3)
+            mvprintw(12, 2, "Telefone inválido! Digite novamente.");
+    } while (strlen(novo.telefone) < 3);
+
+    // ENDEREÇO ================================
+    do {
+        mvprintw(14, 2, "Endereço: ");
+        getnstr(novo.endereco, 149);
+        if (strlen(novo.endereco) < 3)
+            mvprintw(15, 2, "Endereço inválido! Digite novamente.");
+    } while (strlen(novo.endereco) < 3);
+
     clientes[*qtd] = novo;
     (*qtd)++;
 
-    mvprintw(11, 2, "Cliente cadastrado com sucesso!");
-    mvprintw(13, 2, "Pressione qualquer tecla para voltar...");
+    salvarClientesCSV(clientes, *qtd);
+    
+    mvprintw(17, 2, "Cliente cadastrado com sucesso!");
+    mvprintw(18, 2, "Pressione qualquer tecla para voltar...");
     getch();
-    noecho(); // desabilita eco...
-    estado_atual = ST_MENU_PRINCIPAL;
+    estado_atual = ST_CLIENTE_PRINCIPAL;
+
 }
 
-// ---------------- LISTAR CLIENTES ----------------
+// =====================================================
+// =============== LISTAR CLIENTES =====================
+// =====================================================
 void listarClientes(struct Cliente clientes[], int qtd) {
     clear();
+    carregarClientesCSV(clientes, &qtd);
+
     mvprintw(2, 2, "--- Lista de Clientes ---");
+
     if (qtd == 0) {
         mvprintw(4, 2, "Nenhum cliente cadastrado.");
         getch();
@@ -116,25 +252,34 @@ void listarClientes(struct Cliente clientes[], int qtd) {
     for (int i = 0; i < qtd; i++) {
         mvprintw(y++, 2, "Código: %d", clientes[i].codigo);
         mvprintw(y++, 2, "Tipo: %s", (clientes[i].tipo == 'F') ? "Pessoa Física" : "Pessoa Jurídica");
-        mvprintw(y++, 2, "%s: %s", (clientes[i].tipo == 'F') ? "Nome" : "Razão Social", clientes[i].nome);
-        mvprintw(y++, 2, "%s: %s", (clientes[i].tipo == 'F') ? "CPF" : "CNPJ", clientes[i].documento);
+        mvprintw(y++, 2, "Nome/Razão: %s", clientes[i].nome);
+        mvprintw(y++, 2, "Documento: %s", clientes[i].documento);
+        mvprintw(y++, 2, "Telefone: %s", clientes[i].telefone);
+        mvprintw(y++, 2, "Endereço: %s", clientes[i].endereco);
         y++;
     }
 
-    mvprintw(y + 1, 2, "Pressione qualquer tecla para voltar...");
+    mvprintw(18, 2, "Pressione qualquer tecla para voltar...");
     getch();
-    estado_atual = ST_MENU_PRINCIPAL;
+    estado_atual = ST_CLIENTE_PRINCIPAL;
 }
 
-// ---------------- MENU PRINCIPAL ----------------
+// =====================================================
+// =============== MENU CLIENTES =======================
+// =====================================================
 void menuClientes() {
+    echo();
+    curs_set(0);
+
     const char *opcoes[] = {
         "Cadastrar Cliente",
         "Listar Clientes",
+        "Remover Cliente",
         "Sair"
     };
+
     int escolha = 0;
-    int n_opcoes = 3;
+    int n_opcoes = 4;
 
     while (1) {
         clear();
@@ -149,30 +294,25 @@ void menuClientes() {
         refresh();
 
         int ch = getch();
-        
-        if(ch == KEY_UP && escolha > 0) {
-            escolha--;
-        }
-        else if(ch == KEY_DOWN && escolha < n_opcoes - 1) {
-            escolha++;
-        } else if(ch == '\n' || ch == 10) {
-            switch (escolha) {
-                case 0:
-                    estado_atual = ST_CLIENTE_CADASTRO;
-                    break;
 
-                case 1:
-                    estado_atual = ST_CLIENTE_LISTA;
-                    break;
-                    
+        if(ch == KEY_UP && escolha > 0) escolha--;
+        else if(ch == KEY_DOWN && escolha < n_opcoes - 1) escolha++;
+        else if(ch == '\n') {
+            switch (escolha) {
+                case 0: estado_atual = ST_CLIENTE_CADASTRO; return;
+                case 1: estado_atual = ST_CLIENTE_LISTA; return;
                 case 2:
-                    estado_atual = ST_MENU_PRINCIPAL;
+                    removerCliente(clientes, &qtd_clientes);
+                    salvarClientesCSV(clientes, qtd_clientes);
                     break;
-                }
-                break;
+                case 3:
+                    estado_atual = ST_MENU_PRINCIPAL; return;
+            }
         }
     }
 }
+
+
 
 // ---------------- MAIN ----------------
 /*

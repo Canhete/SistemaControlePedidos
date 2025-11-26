@@ -15,13 +15,15 @@
 #define CNPJ_LENGTH 14
 #define MAX_CLIENTES 100
 
-// Estrutura Cliente
+
 
 struct Cliente {
-    int codigo;
-    char tipo; 
-    char nome[100];
-    char documento[15]; 
+     int codigo;
+     char tipo;
+     char nome[100];
+     char documento[15];
+     char telefone[20];
+     char endereco[150];
 };
 
 // Struct cliente global, para usar em todas funções - Raphael
