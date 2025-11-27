@@ -46,7 +46,7 @@ void processaEstado(Estado st){
         // ================================================
 
         case ST_PRODUTO_PRINCIPAL:
-            //menuProdutos();
+            menuProduto();
             break;
 
         // ================================================

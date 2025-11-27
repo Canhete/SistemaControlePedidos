@@ -14,6 +14,7 @@ int criarArquivoPedido(char *mensagem){
         sprintf(mensagem, "Erro ao criar o arquivo de pedidos!");
         return -1;
     }
+    rewind(arq);
 
     // Primeira linha cabeçalho
     fprintf(arq, "id,clienteId,data,total\n");

@@ -1,7 +1,7 @@
 #include "../include/cliente.h"
 #include "../include/interface.h"
 #include "../include/estados.h"
-
+#include "../include/persistencia.h"
 
 
 struct Cliente clientes[MAX_CLIENTES];
@@ -115,7 +115,7 @@ void removerCliente(struct Cliente clientes[], int *qtd) {
 // =============== SALVAR EM CSV =======================
 // =====================================================
 void salvarClientesCSV(struct Cliente clientes[], int qtd) {
-    FILE *fp = fopen("clientes.csv", "w");
+    FILE *fp = fopen(DIRETORIO_ARQUIVO_CLIENTE, "w");
     if (!fp) return;
 
     fprintf(fp, "codigo;tipo;nome;documento;telefone;endereco\n");
@@ -138,7 +138,7 @@ void salvarClientesCSV(struct Cliente clientes[], int qtd) {
 // =============== CARREGAR DADOS =======================
 // =====================================================
 void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
-    FILE *fp = fopen("clientes.csv", "r");
+    FILE *fp = fopen(DIRETORIO_ARQUIVO_CLIENTE, "r");
     if (!fp) return;
 
     char linha[512];

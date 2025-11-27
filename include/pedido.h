@@ -63,6 +63,8 @@ double calcularSubtotal(struct ItemPedido *IP, char *mensagem);
 
 /* Interface */
 
+void desenhaOpcoesVertical(WINDOW *win, char *labels[], int total, int selecionado, int temFoco);
+
 void menuPedidos();
 
 #endif

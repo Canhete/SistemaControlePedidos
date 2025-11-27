@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ncurses.h>
 
 /* DEFINIÇÕES & CONSTANTES */
 
@@ -22,24 +23,29 @@ typedef struct {
     int estoque;
 } Produto;
 
+extern Produto produtos[MAX_PRODUTOS];
+extern int quantidade;
+
 /* FUNÇÕES */
 
-void inserirProduto(Produto produtos[], int *quantidade);
+int validarIdProduto(int id, char *mensagem);
 
-void listarProdutos(Produto produtos[], int quantidade);
+void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win);
 
-void consultarProduto(Produto produtos[], int quantidade);
+void listarProdutos(Produto produtos[], int quantidade, WINDOW *win);
 
-void removerProduto(Produto produtos[], int *quantidade);
+void consultarProduto(Produto produtos[], int quantidade, WINDOW *win);
+
+void removerProduto(Produto produtos[], int *quantidade, WINDOW *win);
 
 int analisarProduto(Produto produtos[], int quantidade, int id);
 
-void salvarProdutosCSV(Produto produtos[], int quantidade);
+void salvarProdutosCSV(Produto produtos[], int quantidade, WINDOW *win);
 
-void carregarProdutosCSV(Produto produtos[], int *quantidade);
+int carregarProdutosCSV(Produto produtos[], int *quantidade, char *mensagem);
 
-void mostrarProduto(Produto produto);
+void mostrarProduto(Produto produto, WINDOW *win);
 
-
+void menuProduto();
 
 #endif
