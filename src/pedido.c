@@ -1018,7 +1018,7 @@ double calcularSubtotal(struct ItemPedido *IP, char *mensagem){
 //                  Tela Pedidos INTERFACE
 //  =========================================================
 
-static void desenhaOpcoesVertical(WINDOW *win, char *labels[], int total, int selecionado, int temFoco){
+void desenhaOpcoesVertical(WINDOW *win, char *labels[], int total, int selecionado, int temFoco){
     if(!win || total <= 0) return; // Não renderiza se não tiver opções nem interface
 
     int altura, largura;

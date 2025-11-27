@@ -2,9 +2,13 @@
 #include "../include/persistencia.h"
 #include "../include/interface.h"
 #include "../include/estados.h"
-#include <ncurses.h>
-#include <string.h>
+#include "../include/utils.h"
+#include"../include/pedido.h"
 
+Produto produtos[MAX_PRODUTOS];
+int quantidade = 0;
+
+/*
 int validarIdProduto(int id, char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
     if(!arq) {
@@ -29,8 +33,12 @@ int validarIdProduto(int id, char *mensagem){
     fclose(arq);
     return 0;
 }
+*/
 
 void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win) {
+    echo();
+    curs_set(1);
+
     char mensagem[BUFFER_ARQUIVO_LINHA];
 
     if (*quantidade >= MAX_PRODUTOS) {
@@ -46,9 +54,11 @@ void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win) {
     mvwprintw(win, 2, 2, "Código do produto: ");
     wrefresh(win);
 
+    int validacao;
+
     do{
         novoProduto.id = input_int(win, 2, 22);
-        int validacao = validarIdProduto(novoProduto.id, mensagem);
+        validacao = validarIdProduto(novoProduto.id, mensagem);
         if(validacao != 0){
             mvwprintw(win, 4, 2, "%s", mensagem);
             wrefresh(win);
@@ -57,7 +67,7 @@ void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win) {
             mvwprintw(win, 2, 22, "%10s", "");
             wrefresh(win);
         }
-    } while(validarIdProduto(novoProduto.id, mensagem) != 0);
+    } while(validacao != 0);
     
     // verifica se código já existe
     if (analisarProduto(produtos, *quantidade, novoProduto.id) != -1) {
@@ -91,13 +101,26 @@ void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win) {
     produtos[*quantidade] = novoProduto;
     (*quantidade)++;
     
+    salvarProdutosCSV(produtos, *quantidade, win);
+
     mvwprintw(win, 10, 2, "Produto cadastrado com sucesso!");
     wrefresh(win);
     napms(2000); // aguarda 2 segundos
+
+    noecho();
+    curs_set(0);
 }
 
 void listarProdutos(Produto produtos[], int quantidade, WINDOW *win) {
+    noecho();
+    curs_set(0);
+
     char mensagem[BUFFER_ARQUIVO_LINHA];
+
+    carregarProdutosCSV(produtos, &quantidade, mensagem);
+    mvwprintw(win, 2, 2, "%100s", ""); // limpa a janela
+    mvwprintw(win, 2, 2, "%s", mensagem);
+    wrefresh(win);
     
     if (quantidade == 0) {
         sprintf(mensagem, "Nenhum produto cadastrado.");
@@ -106,9 +129,8 @@ void listarProdutos(Produto produtos[], int quantidade, WINDOW *win) {
         return;
     }
     
-    int linha = 2;
-    int max_y, max_x;
-    getmaxyx(win, max_y, max_x);
+    int linha = 3;
+    int max_y = getmaxy(win);
 
     mvwprintw(win, linha++, 2, "-----------LISTA DE PRODUTOS-----------");
     mvwprintw(win, linha++, 2, "%-6s %-30s %-10s %-8s", "Código", "Descrição", "Preço", "Estoque");
@@ -127,9 +149,14 @@ void listarProdutos(Produto produtos[], int quantidade, WINDOW *win) {
     mvwprintw(win, linha + 1, 2, "Pressione qualquer tecla para continuar...");
     wrefresh(win);
     wgetch(win);
+    echo();
+    curs_set(1);
 }
 
 void consultarProduto(Produto produtos[], int quantidade, WINDOW *win) {
+    echo();
+    curs_set(1);
+
     char mensagem[BUFFER_ARQUIVO_LINHA];
 
     if (quantidade == 0) {
@@ -159,9 +186,15 @@ void consultarProduto(Produto produtos[], int quantidade, WINDOW *win) {
     mvwprintw(win, 10, 2, "Pressione qualquer tecla para continuar...");
     wrefresh(win);
     wgetch(win);
+
+    noecho();
+    curs_set(0);
 }
 
 void removerProduto(Produto produtos[], int *quantidade, WINDOW *win) {
+    echo();
+    curs_set(1);
+
     char mensagem[BUFFER_ARQUIVO_LINHA];
     
     if (*quantidade == 0) {
@@ -208,6 +241,8 @@ void removerProduto(Produto produtos[], int *quantidade, WINDOW *win) {
     
     wrefresh(win);
     napms(2000);
+    noecho();
+    curs_set(0);
 }
 
 int analisarProduto(Produto produtos[], int quantidade, int id) {
@@ -220,8 +255,11 @@ int analisarProduto(Produto produtos[], int quantidade, int id) {
 }
 
 void salvarProdutosCSV(Produto produtos[], int quantidade, WINDOW *win) {
+    noecho();
+    curs_set(0);
+
     char mensagem[BUFFER_ARQUIVO_LINHA];
-    FILE *arquivo = fopen("data/Produtos.csv", "w");
+    FILE *arquivo = fopen(DIRETORIO_ARQUIVO_PRODUTO, "w");
     if (arquivo == NULL) {
         sprintf(mensagem, "Erro ao abrir arquivo para salvar produtos!");
         mvwprintw(win, 2, 2, "%s", mensagem);
@@ -244,13 +282,16 @@ void salvarProdutosCSV(Produto produtos[], int quantidade, WINDOW *win) {
     mvwprintw(win, 2, 2, "%s", mensagem);
     wrefresh(win);
     napms(2000);
+
+    echo();
+    curs_set(1);
 }
 
-void carregarProdutosCSV(Produto produtos[], int *quantidade, char *mensagem) {
-    FILE *arquivo = fopen("data/produto.csv", "r");
+int carregarProdutosCSV(Produto produtos[], int *quantidade, char *mensagem) {
+    FILE *arquivo = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
     if (arquivo == NULL) {
         sprintf(mensagem, "Arquivo de produtos não encontrado. Iniciando com lista vazia.");
-        return;
+        return -1;
     }
     
     char linha[256];
@@ -283,16 +324,26 @@ void carregarProdutosCSV(Produto produtos[], int *quantidade, char *mensagem) {
     
     fclose(arquivo);
     sprintf(mensagem, "Produtos carregados: %d", *quantidade);
+    return 1;
 }
 
 void mostrarProduto(Produto produto, WINDOW *win) {
+    noecho();
+    curs_set(0);
+
     mvwprintw(win, 5, 2, "Código: %d", produto.id);
     mvwprintw(win, 6, 2, "Descrição: %s", produto.descricao);
     mvwprintw(win, 7, 2, "Preço: R$ %.2f", produto.preco);
     mvwprintw(win, 8, 2, "Estoque: %d unidades", produto.estoque);
+
+    echo();
+    curs_set(1);
 }
 
-void menuProduto(Produto produtos[], int *quantidade){
+void menuProduto(){
+    noecho();
+    curs_set(0);
+
     char *botoesMenu[] = {
         "Inserir produto",
         "Listar produto",
@@ -323,12 +374,12 @@ void menuProduto(Produto produtos[], int *quantidade){
         int posY_janela = UI_PADDING;
 
         // impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
-        if(ehTerminalPequeno(stdscr, altura, largura)) continue;
+        if(ehTerminalPequeno(altura, largura)) continue;
 
         WINDOW *win = newwin(altura_janela, largura_janela, posX_janela, posY_janela);
         box(win, 0, 0);
 
-        desenhaBotoes(win, botoesMenu, totalBotoes, selecionado);
+        desenhaOpcoesVertical(win, botoesMenu, totalBotoes, selecionado, 1);
 
         mvwprintw(win, altura_janela - UI_MARGIN, largura_janela - (int)strlen(texto_do_tamanho) - UI_MARGIN, "%s", texto_do_tamanho);
 
@@ -337,8 +388,8 @@ void menuProduto(Produto produtos[], int *quantidade){
         ch = getch();
 
         // controle dos botões, ENTER confirma e sai do loop
-        if(ch == KEY_LEFT && selecionado > 0) selecionado--;
-        else if(ch == KEY_RIGHT && selecionado < totalBotoes - 1) selecionado++;
+        if(ch == KEY_UP && selecionado > 0) selecionado--;
+        else if(ch == KEY_DOWN && selecionado < totalBotoes - 1) selecionado++;
         else if(ch == 'q' || ch == 'Q' || ch == 27) { 
             estado_atual = ST_MENU_PRINCIPAL;
             delwin(win);
@@ -349,19 +400,19 @@ void menuProduto(Produto produtos[], int *quantidade){
             
             switch(selecionado){
                 case 0:
-                    inserirProduto(produtos, quantidade, win);
+                    inserirProduto(produtos, &quantidade, win);
                     break;
 
                 case 1:
-                    listarProdutos(produtos, *quantidade, win);
+                    listarProdutos(produtos, quantidade, win);
                     break;
 
                 case 2:
-                    consultarProduto(produtos, *quantidade, win);
+                    consultarProduto(produtos, quantidade, win);
                     break;
 
                 case 3:
-                    removerProduto(produtos, quantidade, win);
+                    removerProduto(produtos, &quantidade, win);
                     break;
 
                 case 4:
@@ -375,7 +426,5 @@ void menuProduto(Produto produtos[], int *quantidade){
             box(win, 0, 0);
             wrefresh(win);
         }
-        
-        delwin(win);
     }
 }

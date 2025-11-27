@@ -72,7 +72,7 @@ int validarIdProduto(int id, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         Produto P;
 
-        if(sscanf(linha, "%d,%99[^,],%lf,%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
+        if(sscanf(linha, "%d;%99[^,];%lf;%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
             if(id == P.id){
                 fclose(arq);
                 return 1;
