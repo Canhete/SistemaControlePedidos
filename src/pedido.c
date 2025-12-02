@@ -667,7 +667,7 @@ void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP, i
                     mvwprintw(win, 5, 2, "%s", mensagem);
                     wrefresh(win);
                 }
-            } while(!validarIdProduto(P->id, mensagem));
+            } while(!validarIdPedido(P->id, mensagem));
         }
 
         werase(win);
@@ -687,17 +687,17 @@ void cadastrarItemPedido(WINDOW *win, struct Pedido *P, struct ItemPedido *IP, i
         mvwprintw(win, 5, 2, "ID do produto: ");
         wrefresh(win);
 
-        // A função validarIdProduto é equivalente à função analisaProduto
+        // A função validarIdProduto é equivalente à função analisaProduto, no caso essa se chama validarRapidamenteIdProduto, pois só verifica se o ID existe
         // OBTENÇÃO DO ID DO PRODUTO
         do{
             IP->produtoId = input_int(win, 5, 17);
-            if(!validarIdProduto(IP->produtoId, mensagem)){
+            if(!validarRapidamenteIdProduto(IP->produtoId, mensagem)){
                 mvwprintw(win, 7, 2, "%100s", "");
                 mvwprintw(win, 7, 2, "%s", mensagem);
                 wrefresh(win);
             }
             mvwprintw(win, 5, 17, "%100s", "");
-        } while(!validarIdProduto(IP->produtoId, mensagem));
+        } while(!validarRapidamenteIdProduto(IP->produtoId, mensagem));
 
         mvwprintw(win, 7, 2, "Quantidade: ");
         wrefresh(win);

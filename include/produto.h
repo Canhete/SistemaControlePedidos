@@ -23,29 +23,36 @@ typedef struct {
     int estoque;
 } Produto;
 
+typedef struct {
+    Produto *produtos;
+    int quantidade;
+    int capacidade;
+} GerenciadorProdutos;
+
 extern Produto produtos[MAX_PRODUTOS];
 extern int quantidade;
+extern GerenciadorProdutos gerenciador;
 
 /* FUNÇÕES */
 
 int validarIdProduto(int id, char *mensagem);
 
-void inserirProduto(Produto produtos[], int *quantidade, WINDOW *win);
+void inserirProduto(GerenciadorProdutos *gerenciador, WINDOW *win);
 
-void listarProdutos(Produto produtos[], int quantidade, WINDOW *win);
+void listarProdutos(GerenciadorProdutos *gerenciador, WINDOW *win);
 
-void consultarProduto(Produto produtos[], int quantidade, WINDOW *win);
+void consultarProduto(GerenciadorProdutos *gerenciador, WINDOW *win);
 
-void removerProduto(Produto produtos[], int *quantidade, WINDOW *win);
+void removerProduto(GerenciadorProdutos *gerenciador, WINDOW *win);
 
-int analisarProduto(Produto produtos[], int quantidade, int id);
+int analisarProduto(Produto *produtos, int quantidade, int id);
 
-void salvarProdutosCSV(Produto produtos[], int quantidade, WINDOW *win);
+void salvarProdutosCSV(Produto *produtos, int quantidade, WINDOW *win);
 
-int carregarProdutosCSV(Produto produtos[], int *quantidade, char *mensagem);
+int carregarProdutosCSV(GerenciadorProdutos *gerenciador, char *mensagem);
 
 void mostrarProduto(Produto produto, WINDOW *win);
 
-void menuProduto();
+void menuProduto(GerenciadorProdutos *gerenciador);
 
 #endif

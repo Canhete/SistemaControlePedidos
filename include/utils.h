@@ -29,7 +29,7 @@ int validarIdPedido(int id, char *mensagem);
 
 int validarIdCliente(int codigoVerificado, char *mensagem);
 
-int validarIdProduto(int id, char *mensagem);
+int validarRapidamenteIdProduto(int id, char *mensagem);
 
 int validarData(const char *dataVerificada, char *mensagem);
 
