@@ -60,7 +60,7 @@ int validarIdCliente(int codigoVerificado, char *mensagem){
     return 0; // Verificou toda lista de cliente, cliente não encontrado.
 }
 
-int validarIdProduto(int id, char *mensagem){
+int validarRapidamenteIdProduto(int id, char *mensagem){
     FILE *arq = fopen(DIRETORIO_ARQUIVO_PRODUTO, "r");
     if(!arq){
         sprintf(mensagem, "Erro ao abrir arquivo de produtos!");

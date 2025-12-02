@@ -8,11 +8,7 @@
 #include <stdlib.h>
 
 // estrutura para gerenciar a lista de produtos
-typedef struct {
-    Produto *produtos;
-    int quantidade;
-    int capacidade;
-} GerenciadorProdutos;
+GerenciadorProdutos gerenciador;
 
 // protótipos das funções internas
 static int garantirCapacidade(GerenciadorProdutos *gerenciador, int capacidade_minima);
@@ -657,8 +653,6 @@ void menuProduto(GerenciadorProdutos *gerenciador) {
         int posX_janela = UI_PADDING;
         int posY_janela = UI_PADDING;
 
-        wrefresh(win);
-
         // impede que o terminal fique muito pequeno, por padrão as dimensões minimas são (20x60)
         if(ehTerminalPequeno(altura, largura)) continue;
 
@@ -695,19 +689,19 @@ void menuProduto(GerenciadorProdutos *gerenciador) {
             
             switch(selecionado){
                 case 0:
-                    inserirProduto(produtos, &quantidade, win);
+                    inserirProduto(gerenciador, win);
                     break;
 
                 case 1:
-                    listarProdutos(produtos, quantidade, win);
+                    listarProdutos(gerenciador, win);
                     break;
 
                 case 2:
-                    consultarProduto(produtos, quantidade, win);
+                    consultarProduto(gerenciador, win);
                     break;
 
                 case 3:
-                    removerProduto(produtos, &quantidade, win);
+                    removerProduto(gerenciador, win);
                     break;
 
                 case 4:
