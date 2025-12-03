@@ -135,7 +135,7 @@ void salvarClientesCSV(struct Cliente clientes[], int qtd) {
 }
 
 // =====================================================
-// =============== CARREGAR DADOS =======================
+// =============== CARREGAR DADOS (Corrigido) ==========
 // =====================================================
 void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
     FILE *fp = fopen(DIRETORIO_ARQUIVO_CLIENTE, "r");
@@ -146,16 +146,52 @@ void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
 
     *qtd = 0;
 
-    while (fgets(linha, sizeof(linha), fp) && *qtd < MAX_CLIENTES) {
+    while (fgets(linha, sizeof(linha), fp) != NULL && *qtd < MAX_CLIENTES) {
+        char *token;
         struct Cliente c;
-        sscanf(linha, "%d;%c;%99[^;];%14[^;];%19[^;];%149[^\n]",
-            &c.codigo,
-            &c.tipo,
-            c.nome,
-            c.documento,
-            c.telefone,
-            c.endereco
-        );
+
+        // 1. Código
+        token = strtok(linha, ";");
+        if (token == NULL) continue;
+        c.codigo = atoi(token); // Converte string para int
+
+        // 2. Tipo
+        token = strtok(NULL, ";");
+        if (token == NULL) continue;
+        c.tipo = token[0];
+
+        // 3. Nome/Razão
+        token = strtok(NULL, ";");
+        if (token == NULL) continue;
+        strncpy(c.nome, token, 99);
+        c.nome[99] = '\0';
+
+        // 4. Documento
+        token = strtok(NULL, ";");
+        if (token == NULL) continue;
+        strncpy(c.documento, token, 14);
+        c.documento[14] = '\0';
+
+        // 5. Telefone
+        token = strtok(NULL, ";");
+        if (token == NULL) continue;
+        strncpy(c.telefone, token, 19);
+        c.telefone[19] = '\0';
+
+        // 6. Endereço (o último token deve ter o \n no final, precisa remover)
+        token = strtok(NULL, "\n"); // Troca o delimitador para '\n' para pegar o resto da linha
+        if (token == NULL) continue;
+
+        // Remove o '\r' (retorno de carro) que pode vir em sistemas Windows
+        size_t len = strlen(token);
+        if (len > 0 && token[len-1] == '\r') {
+            token[len-1] = '\0';
+        }
+
+        strncpy(c.endereco, token, 149);
+        c.endereco[149] = '\0';
+
+        // Adiciona ao array e incrementa a contagem
         clientes[*qtd] = c;
         (*qtd)++;
     }
@@ -234,7 +270,7 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd) {
 }
 
 // =====================================================
-// =============== LISTAR CLIENTES =====================
+// =============== LISTAR CLIENTES (Corrigido) =========
 // =====================================================
 void listarClientes(struct Cliente clientes[], int qtd) {
     clear();
@@ -244,7 +280,12 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
     if (qtd == 0) {
         mvprintw(4, 2, "Nenhum cliente cadastrado.");
+        // Mensagem explícita para o usuário voltar ao menu
+        mvprintw(6, 2, "Pressione qualquer tecla para voltar...");
         getch();
+        
+        // Define o estado de volta para o menu principal de clientes
+        estado_atual = ST_CLIENTE_PRINCIPAL; 
         return;
     }
 
@@ -256,13 +297,15 @@ void listarClientes(struct Cliente clientes[], int qtd) {
         mvprintw(y++, 2, "Documento: %s", clientes[i].documento);
         mvprintw(y++, 2, "Telefone: %s", clientes[i].telefone);
         mvprintw(y++, 2, "Endereço: %s", clientes[i].endereco);
-        y++;
+        y++; // linha em branco entre clientes
     }
 
-    mvprintw(18, 2, "Pressione qualquer tecla para voltar...");
+    mvprintw(y + 2, 2, "Pressione qualquer tecla para voltar...");
     getch();
+
     estado_atual = ST_CLIENTE_PRINCIPAL;
 }
+
 
 // =====================================================
 // =============== MENU CLIENTES =======================
