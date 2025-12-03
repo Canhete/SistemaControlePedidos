@@ -24,12 +24,23 @@ const char* obterDataAtual(){
 // ===========================================================
 
 int validarIdPedido(int id, char *mensagem){
+    if(id < 0){
+        sprintf(mensagem, "ID do pedido não pode ser menor que 0!");
+        return 0;
+    }
+
+    if(id == 0){
+        sprintf(mensagem, "ID do pedido não pode ser igual a 0!");
+        return 0;
+    }
+
     int index = analisarPedido(id, mensagem);
 
     if(index == -1) return 0; // Erro ao abrir arquivo
 
     if(index == 1){
         sprintf(mensagem, "ID do pedido já existe! Digite um ID válido!");
+        return 0;
     }
 
     return 1; // Se passar o teste, tá livre para cadastro
@@ -44,10 +55,12 @@ int validarIdCliente(int codigoVerificado, char *mensagem){
 
     char linha[BUFFER_ARQUIVO_LINHA];
     
+    fgets(linha, sizeof(linha), arq);
+
     while(fgets(linha, sizeof(linha), arq)){
         struct Cliente C;
 
-        if(sscanf(linha, "%d,%c,%99[^,],%14[^\n]", &C.codigo, &C.tipo, C.nome, C.documento) == 4){
+        if(sscanf(linha, "%d;%c;%99[^;];%14[^;];%19[^;];%149[^\n]", &C.codigo, &C.tipo, C.nome, C.documento, C.telefone, C.endereco) == 6){
             if(codigoVerificado == C.codigo){
                 fclose(arq);
                 return 1;
@@ -56,7 +69,7 @@ int validarIdCliente(int codigoVerificado, char *mensagem){
     }
 
     fclose(arq);
-    mensagem = "Código de cliente não existe! Digite um código válido!";
+    sprintf(mensagem, "Código de cliente não existe! Digite um código válido!");
     return 0; // Verificou toda lista de cliente, cliente não encontrado.
 }
 
@@ -72,7 +85,7 @@ int validarRapidamenteIdProduto(int id, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         Produto P;
 
-        if(sscanf(linha, "%d;%99[^,];%lf;%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
+        if(sscanf(linha, "%d;%99[^;];%lf;%d", &P.id, P.descricao, &P.preco, &P.estoque) == 4){
             if(id == P.id){
                 fclose(arq);
                 return 1;

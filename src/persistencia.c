@@ -9,15 +9,35 @@
 // ====================================================================
 
 int criarArquivoPedido(char *mensagem){
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "a");
-    if(!arq){
-        sprintf(mensagem, "Erro ao criar o arquivo de pedidos!");
-        return -1;
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r+");
+    if(!arq){ // Se não existe, cria
+        arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "w");
+        if(!arq){
+            sprintf(mensagem, "Erro ao criar o arquivo de pedidos!");
+            return -1;
+        }
+
+        fprintf(arq, "pedido_id;cliente_id;data;total\n");
+        fclose(arq);
+        return 1;
     }
     rewind(arq);
 
+    char linha[BUFFER_ARQUIVO_LINHA];
+
     // Primeira linha cabeçalho
-    fprintf(arq, "id,clienteId,data,total\n");
+    if(fgets(linha, sizeof(linha), arq) == NULL){
+        rewind(arq);
+        fprintf(arq, "pedido_id;cliente_id;data;total\n");
+        fclose(arq);
+        return 1;
+    }
+
+    // Caso o cabeçalho esta escrito de maneira incorreta, sobreescreve
+    if(strcmp(linha, "pedido_id;cliente_id;data;total\n") != 0){
+        rewind(arq);
+        fprintf(arq, "pedido_id;cliente_id;data;total\n");
+    }
 
     fclose(arq);
     return 1; // -> sucesso
@@ -30,10 +50,48 @@ int guardarPedido(struct Pedido *P, char *mensagem){
         return -1;
     }
 
-    fprintf(arq, "%d,%d,%10s,%.2lf\n", P->id, P->clienteId, P->data, P->total);
+    fprintf(arq, "%d;%d;%10s;%.2lf\n", P->id, P->clienteId, P->data, P->total);
 
     fclose(arq);
     return 1; // -> sucesso
+}
+
+int atualizarPedido(struct Pedido *P, char *mensagem){
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "r+");
+    if (!arq) {
+        sprintf(mensagem, "Erro ao abrir arquivo de pedidos!");
+        return 0;
+    }
+
+    FILE *tmp = fopen(DIRETORIO_ARQUIVO_TEMP, "w");
+    if (!tmp) {
+        sprintf(mensagem, "Erro ao criar arquivo temporário!");
+        return 0;
+    }
+
+    char linha[BUFFER_ARQUIVO_LINHA];
+
+    fprintf(tmp, "id;clienteId;data;total\n");
+
+    while (fgets(linha, sizeof(linha), arq)) {
+        struct Pedido x;
+
+        if (sscanf(linha, "%d;%d;%10[^;];%lf", &x.id, &x.clienteId, x.data, &x.total) == 4) {
+            if (x.id == P->id) { // Se for o mesmo pedido, atualiza
+                fprintf(tmp, "%d;%d;%s;%.2lf\n", P->id, P->clienteId, P->data, P->total);
+            } else { // Se não copia
+                fputs(linha, tmp);
+            }
+        }
+    }
+
+    fclose(arq);
+    fclose(tmp);
+
+    remove(DIRETORIO_ARQUIVO_PEDIDO);
+    rename(DIRETORIO_ARQUIVO_TEMP, DIRETORIO_ARQUIVO_PEDIDO);
+
+    return 1;
 }
 
 int analisarPedido(int idDoPedido, char *mensagem) {
@@ -48,7 +106,7 @@ int analisarPedido(int idDoPedido, char *mensagem) {
     while(fgets(linha, sizeof(linha), arq)) {
         struct Pedido P;
 
-        if(sscanf(linha, "%d,%d,%10[^,],%lf", &P.id, &P.clienteId, P.data, &P.total) == 4){
+        if(sscanf(linha, "%d;%d;%10[^;];%lf", &P.id, &P.clienteId, P.data, &P.total) == 4){
             if(idDoPedido == P.id){
                 fclose(arq);
                 return 1; // Pedido existe
@@ -82,7 +140,7 @@ int apagarPedido(int idParaRemover, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         struct Pedido P;
         
-        if(sscanf(linha, "%d,%d,%10[^,],%lf", &P.id, &P.clienteId, P.data, &P.total) == 4){
+        if(sscanf(linha, "%d;%d;%10[^;];%lf", &P.id, &P.clienteId, P.data, &P.total) == 4){
             if(idParaRemover != P.id){
                 fputs(linha, arqtemp);
             }
@@ -116,7 +174,7 @@ int apagarTodosPedidosDoCliente(int idDoCliente, char *mensagem){
 
     while(fgets(linha, sizeof(linha), arq)){
         int clienteId;
-        sscanf(linha, "%*d,%d,", &clienteId);
+        sscanf(linha, "%*d;%d;", &clienteId);
         if(clienteId != idDoCliente) fputs(linha, arqtemp);
     }
 
@@ -165,14 +223,35 @@ int apagarTodosPedidosExistentes(char *mensagem){
 // ====================================================================
 
 int criarArquivoItemPedido(char *mensagem){
-    FILE *arq = fopen(DIRETORIO_ARQUIVO_PEDIDO, "a");
-    if(!arq){
-        sprintf(mensagem, "Erro ao criar o arquivo de item de pedidos!");
-        return -1;
+    FILE *arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "r+");
+    if(!arq){ // Se não existe, cria
+        arq = fopen(DIRETORIO_ARQUIVO_ITEM_PEDIDO, "w");
+        if(!arq){
+            sprintf(mensagem, "Erro ao criar o arquivo de item pedidos!");
+            return -1;
+        }
+
+        fprintf(arq, "pedido_id;produto_id;quantidade;subtotal\n");
+        fclose(arq);
+        return 1;
     }
+    rewind(arq);
+
+    char linha[BUFFER_ARQUIVO_LINHA];
 
     // Primeira linha cabeçalho
-    fprintf(arq, "pedidoId,produtoId,quantidade,subtotal\n");
+    if(fgets(linha, sizeof(linha), arq) == NULL){
+        rewind(arq);
+        fprintf(arq, "pedido_id;produto_id;quantidade;subtotal\n");
+        fclose(arq);
+        return 1;
+    }
+
+    // Caso o cabeçalho esta escrito de maneira incorreta, sobreescreve
+    if(strcmp(linha, "pedido_id;produto_id;quantidade;subtotal\n") != 0){
+        rewind(arq);
+        fprintf(arq, "pedido_id;produto_id;quantidade;subtotal\n");
+    }
 
     fclose(arq);
     return 1; // -> sucesso
@@ -185,7 +264,7 @@ int guardarItemPedido(struct ItemPedido *IP, char *mensagem){
         return -1;
     }
 
-    fprintf(arq, "%d,%d,%d,%.2lf\n", IP->pedidoId, IP->produtoId, IP->quantidade, IP->subtotal);
+    fprintf(arq, "%d;%d;%d;%.2lf\n", IP->pedidoId, IP->produtoId, IP->quantidade, IP->subtotal);
 
     fclose(arq);
     return 1;
@@ -203,7 +282,7 @@ int analisarItemPedido(int idDoItemPedido, char *mensagem) {
     while(fgets(linha, sizeof(linha), arq)) {
         struct ItemPedido IP;
 
-        if(sscanf(linha, "%d,%d,%d,%lf", &IP.pedidoId, &IP.produtoId, &IP.quantidade, &IP.subtotal) == 4 && IP.pedidoId == idDoItemPedido) {
+        if(sscanf(linha, "%d;%d;%d;%lf", &IP.pedidoId, &IP.produtoId, &IP.quantidade, &IP.subtotal) == 4 && IP.pedidoId == idDoItemPedido) {
             fclose(arq);
             return 1;
         }
@@ -231,7 +310,7 @@ int apagarItemPedido(int idParaRemover, char *mensagem){
     while(fgets(linha, sizeof(linha), arq)){
         struct ItemPedido IP;
         
-        if(sscanf(linha, "%d,%d,%d,%lf", &IP.pedidoId, &IP.produtoId, &IP.quantidade, &IP.subtotal) == 4){
+        if(sscanf(linha, "%d;%d;%d;%lf", &IP.pedidoId, &IP.produtoId, &IP.quantidade, &IP.subtotal) == 4){
             if(idParaRemover != IP.pedidoId){
                 fputs(linha, arqtemp);
             }
@@ -265,7 +344,7 @@ int apagarTodosItensDoPedido(int idDoPedido, char *mensagem){
 
     while(fgets(linha, sizeof(linha), arq)){
         int pedidoId;
-        sscanf(linha, "%d,", &pedidoId);
+        sscanf(linha, "%d;", &pedidoId);
         if(pedidoId != idDoPedido) fputs(linha, arqtemp);
     }
 

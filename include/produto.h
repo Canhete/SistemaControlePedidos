@@ -53,6 +53,6 @@ int carregarProdutosCSV(GerenciadorProdutos *gerenciador, char *mensagem);
 
 void mostrarProduto(Produto produto, WINDOW *win);
 
-void menuProduto(GerenciadorProdutos *gerenciador);
+void menuProduto();
 
 #endif
