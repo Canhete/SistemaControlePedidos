@@ -55,8 +55,6 @@ void listarItemPedidosDoPedido(WINDOW *win, int idPedido);
 
 void listarTodosItensPedidos(WINDOW *win);
 
-int atualizarPedido(struct Pedido *P, char *mensagem);
-
 /* Cálculos */
 
 double calcularTotal(struct Pedido *P, char *mensagem);

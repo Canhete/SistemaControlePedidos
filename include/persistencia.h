@@ -35,6 +35,8 @@ int apagarTodosPedidosDoCliente(int idDoCliente, char *mensagem);
 
 int apagarTodosPedidosExistentes(char *mensagem);
 
+int atualizarPedido(struct Pedido *P, char *mensagem);
+
 /* FUNÇÕES ITEM DE PEDIDO */
 
 int criarArquivoItemPedido(char *mensagem);
