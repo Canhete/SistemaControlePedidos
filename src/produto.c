@@ -614,7 +614,8 @@ void mostrarProduto(Produto produto, WINDOW *win) {
     curs_set(1);
 }
 
-void menuProduto(GerenciadorProdutos *gerenciador) {
+void menuProduto() {
+    GerenciadorProdutos *gerenciador = criarGerenciadorProdutos();
     if (gerenciador == NULL) return;
     
     noecho();
@@ -661,6 +662,9 @@ void menuProduto(GerenciadorProdutos *gerenciador) {
 
         desenhaOpcoesVertical(win, botoesMenu, totalBotoes, selecionado, 1);
 
+        mvwprintw(win, 3, (largura_janela - 20) / 2, "MENU DE PRODUTOS");
+        mvwprintw(win, 7, (largura_janela - 26)/ 2, "Selecione uma opção:");
+
         mvwprintw(win, altura_janela - UI_MARGIN, largura_janela - (int)strlen(texto_do_tamanho) - UI_MARGIN, "%s", texto_do_tamanho);
 
         wrefresh(win);
@@ -682,6 +686,7 @@ void menuProduto(GerenciadorProdutos *gerenciador) {
         else if(ch == 'q' || ch == 'Q' || ch == 27) { 
             estado_atual = ST_MENU_PRINCIPAL;
             delwin(win);
+            destruirGerenciadorProdutos(gerenciador);
             break;
         } else if(ch == '\n' || ch == 10){ 
             werase(win);
@@ -707,6 +712,7 @@ void menuProduto(GerenciadorProdutos *gerenciador) {
                 case 4:
                     estado_atual = ST_MENU_PRINCIPAL;
                     delwin(win);
+                    destruirGerenciadorProdutos(gerenciador);
                     return;
             }
             
