@@ -2,7 +2,8 @@
 #include "../include/interface.h"
 #include "../include/estados.h"
 #include "../include/persistencia.h"
-
+#include <string.h> // Adicionado para strcmp e outras funções
+#include <ctype.h>  // Adicionado para toupper
 
 struct Cliente clientes[MAX_CLIENTES];
 int qtd_clientes = 0;
@@ -57,6 +58,78 @@ int validarCNPJ(char cnpj[]) {
 }
 
 // =====================================================
+// ============ NOVO: BUSCAR POR DOCUMENTO =============
+// =====================================================
+// A função deve ser ajustada para usar a variável global qtd_clientes
+int buscarClientePorDocumento(const char documento[]) {
+    for (int i = 0; i < qtd_clientes; i++) {
+        if (strcmp(clientes[i].documento, documento) == 0) {
+            return 1; // Documento encontrado
+        }
+    }
+    return 0; // Documento não encontrado
+}
+
+
+// =====================================================
+// == NOVO: FUNÇÃO CENTRALIZADA DE VALIDAÇÃO E DUPLICIDADE ===
+// =====================================================
+int obterDocumentoComValidacao(struct Cliente *novo_cliente, int *qtd) {
+    int tentar_novamente = 1;
+    char tipo = novo_cliente->tipo;
+    char doc_nome[20];
+    
+    // Define os nomes e funções de validação
+    if (tipo == 'F') {
+        strcpy(doc_nome, "CPF (somente números): ");
+    } else {
+        strcpy(doc_nome, "CNPJ (somente números): ");
+    }
+
+    do {
+        clear();
+        // Redesenha o contexto de cadastro
+        mvprintw(2, 2, "--- Cadastro de Cliente ---");
+        mvprintw(4, 2, "Pessoa Física (F) ou Jurídica (J): %c", tipo);
+        mvprintw(6, 2, (tipo == 'F' ? "Nome: %s" : "Razão Social: %s"), novo_cliente->nome); 
+        
+        mvprintw(8, 2, doc_nome);
+        getnstr(novo_cliente->documento, 14);
+
+        int valido = (tipo == 'F') ? validarCPF(novo_cliente->documento) : validarCNPJ(novo_cliente->documento);
+        int duplicado = 0;
+
+        // Só verifica duplicidade se o documento for válido
+        if (valido) {
+            // A busca usa a variável global qtd_clientes carregada em cadastrarCliente
+            duplicado = buscarClientePorDocumento(novo_cliente->documento);
+        }
+
+        if (!valido) {
+            mvprintw(9, 2, "%s inválido!", (tipo == 'F' ? "CPF" : "CNPJ"));
+        } else if (duplicado) {
+            mvprintw(9, 2, "ERRO: %s já cadastrado!", (tipo == 'F' ? "CPF" : "CNPJ"));
+        }
+
+        if (!valido || duplicado) {
+            mvprintw(11, 2, "Deseja tentar novamente (S) ou voltar ao menu (V)? ");
+            
+            char escolha = getch();
+            escolha = toupper(escolha);
+
+            if (escolha == 'V') {
+                return 0; // Usuário escolheu voltar
+            }
+        } else {
+            tentar_novamente = 0; // Documento válido e único
+        }
+    } while (tentar_novamente);
+
+    return 1; // Documento obtido com sucesso
+}
+
+
+// =====================================================
 // =============== FUNÇÃO REMOVER CLIENTE ==============
 // =====================================================
 void removerCliente(struct Cliente clientes[], int *qtd) {
@@ -64,7 +137,6 @@ void removerCliente(struct Cliente clientes[], int *qtd) {
     curs_set(1);
     clear();
 
-    // --- CORREÇÃO: sempre carregar clientes antes ---
     carregarClientesCSV(clientes, qtd);
 
     if (*qtd == 0) {
@@ -135,7 +207,7 @@ void salvarClientesCSV(struct Cliente clientes[], int qtd) {
 }
 
 // =====================================================
-// =============== CARREGAR DADOS (Corrigido) ==========
+// =============== CARREGAR DADOS ======================
 // =====================================================
 void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
     FILE *fp = fopen(DIRETORIO_ARQUIVO_CLIENTE, "r");
@@ -179,10 +251,9 @@ void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
         c.telefone[19] = '\0';
 
         // 6. Endereço (o último token deve ter o \n no final, precisa remover)
-        token = strtok(NULL, "\n"); // Troca o delimitador para '\n' para pegar o resto da linha
+        token = strtok(NULL, "\n"); 
         if (token == NULL) continue;
 
-        // Remove o '\r' (retorno de carro) que pode vir em sistemas Windows
         size_t len = strlen(token);
         if (len > 0 && token[len-1] == '\r') {
             token[len-1] = '\0';
@@ -191,7 +262,6 @@ void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
         strncpy(c.endereco, token, 149);
         c.endereco[149] = '\0';
 
-        // Adiciona ao array e incrementa a contagem
         clientes[*qtd] = c;
         (*qtd)++;
     }
@@ -200,7 +270,7 @@ void carregarClientesCSV(struct Cliente clientes[], int *qtd) {
 }
 
 // =====================================================
-// =============== CADASTRO CLIENTE ====================
+// =============== CADASTRO CLIENTE (Refatorado) =======
 // =====================================================
 void cadastrarCliente(struct Cliente clientes[], int *qtd) {
     echo();
@@ -218,26 +288,20 @@ void cadastrarCliente(struct Cliente clientes[], int *qtd) {
     mvprintw(6, 2, (novo.tipo == 'F') ? "Nome: " : "Razão Social: ");
     getnstr(novo.nome, 99);
 
-    // Documento ================================
-    if (novo.tipo == 'F') {
-        do {
-            mvprintw(8, 2, "CPF (somente números): ");
-            getnstr(novo.documento, 14);
-            if (!validarCPF(novo.documento))
-                mvprintw(9, 2, "CPF inválido! Tente novamente.");
-        } while (!validarCPF(novo.documento));
-
-    } else if (novo.tipo == 'J') {
-        do {
-            mvprintw(8, 2, "CNPJ (somente números): ");
-            getnstr(novo.documento, 14);
-            if (!validarCNPJ(novo.documento))
-                mvprintw(9, 2, "CNPJ inválido! Tente novamente.");
-        } while (!validarCNPJ(novo.documento));
-
+    // 1. Carregar clientes para verificar duplicidade
+    carregarClientesCSV(clientes, qtd);
+    
+    // 2. USO DA NOVA FUNÇÃO PARA OBTER E VALIDAR O DOCUMENTO
+    if (novo.tipo == 'F' || novo.tipo == 'J') {
+        if (obterDocumentoComValidacao(&novo, qtd) == 0) {
+            // Se retornar 0, o usuário escolheu voltar
+            estado_atual = ST_CLIENTE_PRINCIPAL;
+            return;
+        }
     } else {
         mvprintw(10, 2, "Tipo inválido!");
         getch();
+        estado_atual = ST_CLIENTE_PRINCIPAL;
         return;
     }
 
@@ -280,11 +344,9 @@ void listarClientes(struct Cliente clientes[], int qtd) {
 
     if (qtd == 0) {
         mvprintw(4, 2, "Nenhum cliente cadastrado.");
-        // Mensagem explícita para o usuário voltar ao menu
         mvprintw(6, 2, "Pressione qualquer tecla para voltar...");
         getch();
         
-        // Define o estado de volta para o menu principal de clientes
         estado_atual = ST_CLIENTE_PRINCIPAL; 
         return;
     }

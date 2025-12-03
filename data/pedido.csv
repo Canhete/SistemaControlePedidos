@@ -1,4 +1,5 @@
-id_do_pedido,id_do_cliente,data,total
+pedido_id;cliente_id;data;total
+total
 1,49,08/01/2023,8278.56
 2,41,07/07/2025,2844.36
 3,27,27/09/2023,5110.7
